@@ -15,3 +15,56 @@ datasource db {
 model Example {
   id Int @id @default(autoincrement())
 }
+
+model Usuario {
+  id_usuario        Int       @id @default(autoincrement())
+  nombre_completo   String
+  email             String    @unique
+  contraseña        String
+  fecha_nacimiento  DateTime
+  telefono          String
+  registrado_con    RegistradoCon
+  fecha_registro    DateTime  @default(now())
+  host              Boolean   @default(false)
+  driver            Boolean   @default(false)
+  verificado        Boolean   @default(false)
+
+    // Relaciones
+  verificaciones        Verificaciones[]
+  terminos_condiciones  TerminosCondiciones[]
+}
+
+model Verificaciones {
+  id_codigo    Int    @id @default(autoincrement())
+  id_usuario   Int
+  codigo       String
+  tipo         TipoVerificacion
+  creado_en    DateTime @default(now())
+  expiracion   DateTime
+  usado        Boolean  @default(false)
+
+  // Relación con Usuario
+  usuario Usuario @relation(fields: [id_usuario], references: [id_usuario])
+}
+
+model TerminosCondiciones {
+  id_aceptacion      Int    @id @default(autoincrement())
+  id_usuario         Int
+  version_terminos   String
+  fecha_aceptacion   DateTime
+
+  // Relación con Usuario
+  usuario Usuario @relation(fields: [id_usuario], references: [id_usuario])
+}
+
+// ENUMS
+
+enum RegistradoCon {
+  email
+  google
+}
+
+enum TipoVerificacion {
+  recuperacion
+  verificacion
+}
