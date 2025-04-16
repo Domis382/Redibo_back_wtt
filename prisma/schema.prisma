@@ -16,9 +16,9 @@ model Usuario {
   telefono         Int?
   registrado_con   RegistradoCon
   fecha_registro   DateTime             @default(now())
-  verificado       Boolean              @default(false)
-  host             Boolean              @default(false)
-  driver           Boolean              @default(false)
+  verificado        Boolean   @default(false)
+  host              Boolean   @default(false)
+  driver            Boolean   @default(false)
 
   verificaciones   Verificaciones[]
   terminosCondiciones Terminos_condiciones[]
