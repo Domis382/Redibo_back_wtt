@@ -2,7 +2,6 @@ import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import dotenv from 'dotenv';
-
 import authRoutes from './routes/auth.routes';
 // Cargar variables de entorno
 dotenv.config();
@@ -22,6 +21,7 @@ app.use('/api', authRoutes);
 app.get('/health', (req, res) => {
   res.status(200).json({ status: 'ok' });
 });
+
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
