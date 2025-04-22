@@ -35,3 +35,10 @@ export const createUser = async (data: {
 export const validatePassword = async (inputPassword: string, hashedPassword: string) => {
   return bcrypt.compare(inputPassword, hashedPassword);
 };
+
+// Agregar la función getUserById
+export const getUserById = async (id_usuario: number) => {
+  return prisma.usuario.findUnique({
+    where: { id_usuario: id_usuario },
+  });
+};

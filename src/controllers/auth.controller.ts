@@ -1,4 +1,4 @@
-import { Request, Response } from 'express';
+import {Request, Response } from 'express';
 import * as authService from '@/services/auth.service';
 
 export const register = async (req: Request, res: Response) => {
@@ -41,6 +41,31 @@ export const login = async (req: Request, res: Response) => {
     }
 
     return res.json({ message: 'Login exitoso', user: { email: user.email } });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: 'Error en el servidor' });
+  }
+};
+
+export const getUserProfile = async (req: Request, res: Response) => {
+  const { id_usuario } = req.params; // Asumiendo que el ID del usuario se pasa en los parámetros
+
+  try {
+    // Llamamos al servicio para obtener el usuario por su ID
+    const user = await authService.getUserById(Number(id_usuario));
+
+    if (!user) {
+      return res.status(404).json({ message: 'Usuario no encontrado' });
+    }
+
+    // Si el usuario existe, devolvemos sus datos
+    return res.json({
+      id_usuario: user.id_usuario,
+      nombre_completo: user.nombre_completo,
+      email: user.email,
+      telefono: user.telefono,
+      fecha_nacimiento: user.fecha_nacimiento,
+    });
   } catch (error) {
     console.error(error);
     return res.status(500).json({ message: 'Error en el servidor' });
