@@ -69,10 +69,7 @@ export const login = async (req: Request, res: Response) => {
         .json({ message: "Correo ingresado no se encuentra en el sistema." });
     }
 
-    const isValid = await authService.validatePassword(
-      password,
-      user.contraseña
-    );
+    const isValid = await authService.validatePassword(password, user.contraseña ?? "");
 
     if (!isValid) {
       return res.status(401).json({ message: "Los datos no son válidos" });
