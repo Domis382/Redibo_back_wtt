@@ -48,18 +48,21 @@ export const login = async (req: Request, res: Response) => {
 };
 
 export const getUserProfile = async (req: Request, res: Response) => {
-  const { id_usuario } = req.params; // Asumiendo que el ID del usuario se pasa en los parámetros
+  const id_usuario = Number(req.params.id_usuario); // Aseguramos que sea número
+
+  if (isNaN(id_usuario)) {
+    return res.status(400).json({ message: 'ID de usuario inválido' });
+  }
 
   try {
-    // Llamamos al servicio para obtener el usuario por su ID
-    const user = await authService.getUserById(Number(id_usuario));
+    const user = await authService.getUserById(id_usuario); // Usamos el servicio
 
     if (!user) {
       return res.status(404).json({ message: 'Usuario no encontrado' });
     }
 
-    // Si el usuario existe, devolvemos sus datos
-    return res.json({
+    // Devolvemos los datos sin contraseña ni campos sensibles
+    return res.status(200).json({
       id_usuario: user.id_usuario,
       nombre_completo: user.nombre_completo,
       email: user.email,
@@ -67,11 +70,10 @@ export const getUserProfile = async (req: Request, res: Response) => {
       fecha_nacimiento: user.fecha_nacimiento,
     });
   } catch (error) {
-    console.error(error);
+    console.error('Error al obtener el perfil:', error);
     return res.status(500).json({ message: 'Error en el servidor' });
   }
 };
-
 
 
 

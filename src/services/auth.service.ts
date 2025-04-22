@@ -36,9 +36,15 @@ export const validatePassword = async (inputPassword: string, hashedPassword: st
   return bcrypt.compare(inputPassword, hashedPassword);
 };
 
-// Agregar la función getUserById
 export const getUserById = async (id_usuario: number) => {
-  return prisma.usuario.findUnique({
-    where: { id_usuario: id_usuario },
+  return await prisma.usuario.findUnique({
+    where: { id_usuario }, // Asegúrate que en Prisma el campo se llame id_usuario
+    select: { // Evita traer la contraseña u otros campos sensibles
+      id_usuario: true,
+      nombre_completo: true,
+      email: true,
+      telefono: true,
+      fecha_nacimiento: true,
+    },
   });
 };

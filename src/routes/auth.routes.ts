@@ -6,7 +6,7 @@ const router = Router();
 
 router.post('/register', register);
 router.post('/login', login);
-router.get('/user-profile/:id_usuario', getUserProfile);
+router.get('/user-profile/:id_usuario', getUserProfile); // 👈 Asegúrate de que este controlador esté definido en auth.controller.ts
 
 
 export default router;
