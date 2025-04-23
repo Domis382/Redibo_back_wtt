@@ -26,7 +26,7 @@ export const recoverPassword: RequestHandler = async (req, res) => {
   console.log('🧪 Correo recibido en password.controller:', email);
   
   try {
-    const user = await prisma.user.findUnique({ where: { email } });
+    const user = await prisma.usuario.findUnique({ where: { email } });
 
     if (!user) {
       res.status(404).json({ message: 'El correo no está registrado en Redibo' });
@@ -42,7 +42,7 @@ export const recoverPassword: RequestHandler = async (req, res) => {
     if (user.isBlocked && user.blockuntil && new Date() >= user.blockuntil) {
       console.log('🔓 Bloqueo expirado. Restaurando estado del usuario...');
 
-      await prisma.user.update({
+      await prisma.usuario.update({
         where: { email: user.email },
         data: {
           isBlocked: false,
@@ -59,12 +59,12 @@ export const recoverPassword: RequestHandler = async (req, res) => {
 
     const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
 
-    await prisma.user.update({
+    await prisma.usuario.update({
       where: { email },
       data: { codigoVerificacion: verificationCode },
     });
     // Consulta para obtener el código de verificación desde la base de datos
-    const updatedUser = await prisma.user.findUnique({
+    const updatedUser = await prisma.usuario.findUnique({
       where: { email },
       select: { codigoVerificacion: true }, // Solo obtenemos el código de verificación
     });

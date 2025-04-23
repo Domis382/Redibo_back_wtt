@@ -33,14 +33,14 @@ export const verifyCode = async (req: Request, res: Response) => {
   }
   
   try {
-    const user = await prisma.user.findFirst({
+    const user = await prisma.usuario.findFirst({
       where: {
         email: userData.emailBD, 
         //codigoVerificacion: code.trim(),
       },
     });
     
-    let updatedUser = await prisma.user.update({
+    let updatedUser = await prisma.usuario.update({
       where: { email: userData.emailBD },
       data: {} // Provide a valid object, even if empty
     });
@@ -53,7 +53,7 @@ export const verifyCode = async (req: Request, res: Response) => {
         console.log('Código verificado correctamente');
 
         // Reset failed login attempts after successful login
-        await prisma.user.update({
+        await prisma.usuario.update({
           where: { email: user?.email ?? '' },
           data: {
             failedCodeAttempts: 0,
@@ -62,7 +62,7 @@ export const verifyCode = async (req: Request, res: Response) => {
         return res.status(200).json({ message: 'Código verificado correctamente' });
       }else {
         console.log('Código incorrecto. Incrementando los intentos fallidos...');
-        updatedUser = await prisma.user.update({
+        updatedUser = await prisma.usuario.update({
           where: { email: user?.email },
           data: {
             failedCodeAttempts: { increment: 1 },
@@ -74,7 +74,7 @@ export const verifyCode = async (req: Request, res: Response) => {
 
         if (updatedUser.failedCodeAttempts === 5) {
           const blockUntil = new Date(Date.now() + 15 * 60 * 1000); // Bloquear al usuario durante 15 minutos
-          await prisma.user.update({
+          await prisma.usuario.update({
             where: { email: user?.email },
             data: {
               isBlocked: true,

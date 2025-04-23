@@ -21,7 +21,7 @@ export const resetPassword: RequestHandler = async (req, res) => {
   }
 
   try {
-    const foundUser = await prisma.user.findFirst({
+    const foundUser = await prisma.usuario.findFirst({
       where: { email: userEmailBD },
     });
 
@@ -34,7 +34,7 @@ export const resetPassword: RequestHandler = async (req, res) => {
     // 🔐 Encriptar la contraseña antes de guardarla
     const hashedPassword = await bcrypt.hash(newPassword, 10);
 
-    await prisma.user.update({
+    await prisma.usuario.update({
       where: { email: foundUser.email },
       data: {
         contraseña: hashedPassword,
