@@ -1,6 +1,6 @@
 // src/routes/auth.routes.ts
 import { Router } from "express";
-import { register, login } from "@/controllers/auth.controller"; // 👈 IMPORTA BIEN AQUÍ
+import { register, login, getUserProfile } from "@/controllers/auth.controller"; // 👈 IMPORTA BIEN AQUÍ
 import { validateRegister } from "@/middlewares/validateRegister"; // 👈 IMPORTAR middleware de validación
 import { validateLogin } from "@/middlewares/validateLogin";
 import passport from "passport";
@@ -42,6 +42,7 @@ router.get("/auth/failure", (req, res) => {
 
 router.post("/register", validateRegister, register);
 router.post("/login", validateLogin, login);
+router.get('/user-profile/:id_usuario', getUserProfile);
 
 passport.authenticate("google", {
     failureRedirect: "http://localhost:3000/home?error=cuentaExistente",

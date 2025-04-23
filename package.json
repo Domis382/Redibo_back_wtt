@@ -1,5 +1,5 @@
 {
-  "name": "RediboBack",
+  "name": "rediboback",
   "version": "1.0.0",
   "description": "API with Express, TypeScript and ORM-Prisma",
   "main": "dist/index.js",
@@ -50,5 +50,13 @@
     "ts-node-dev": "^2.0.0",
     "tsconfig-paths": "^4.2.0",
     "typescript": "^5.8.3"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Ssantivl12/RediBo_Back.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Ssantivl12/RediBo_Back/issues"
+  },
+  "homepage": "https://github.com/Ssantivl12/RediBo_Back#readme"
 }

@@ -13,10 +13,10 @@ async (accessToken, refreshToken, profile, done) => {
   try {
     const email = profile.emails?.[0].value;
 
-    let user = await prisma.user.findUnique({ where: { email } });
+    let user = await prisma.usuario.findUnique({ where: { email } });
 
     if (!user) {
-      user = await prisma.user.create({
+      user = await prisma.usuario.create({
         data: {
           email,
           nombre_completo: profile.displayName || "",
@@ -37,7 +37,7 @@ passport.serializeUser((user: any, done) => {
 
 passport.deserializeUser(async (email: string, done) => {
   try {
-    const user = await prisma.user.findUnique({ where: { email } });
+    const user = await prisma.usuario.findUnique({ where: { email } });
     done(null, user || null);
   } catch (err) {
     done(err, null);

@@ -64,6 +64,18 @@ export const validatePassword = async (
   return bcrypt.compare(inputPassword, hashedPassword);
 };
 
+export const getUserById = async (id_usuario: number) => {
+  return await prisma.usuario.findUnique({
+    where: { id_usuario }, // Asegúrate que en Prisma el campo se llame id_usuario
+    select: { // Evita traer la contraseña u otros campos sensibles
+      id_usuario: true,
+      nombre_completo: true,
+      email: true,
+      telefono: true,
+      fecha_nacimiento: true,
+    },
+  });
+};
 export const createUserWithGoogle = async (email: string, name: string) => {
   return prisma.usuario.create({
     data: {
