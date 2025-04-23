@@ -1,5 +1,5 @@
-import { PrismaClient } from '@prisma/client';
-import bcrypt from 'bcryptjs';
+import { PrismaClient } from "@prisma/client";
+import bcrypt from "bcryptjs";
 
 const prisma = new PrismaClient();
 
@@ -32,7 +32,35 @@ export const createUser = async (data: {
   });
 };
 
-export const validatePassword = async (inputPassword: string, hashedPassword: string) => {
+export const updateGoogleProfile = async (
+  email: string,
+  nombre_completo: string,
+  fecha_nacimiento: string
+) => {
+
+  const existingUser = await prisma.usuario.findUnique({
+    where: { email },
+  });
+
+  if (existingUser && existingUser.registrado_con === "email") {
+    throw new Error("Este correo ya está registrado con email");
+  }
+
+  const updatedUser = await prisma.usuario.update({
+    where: { email },
+    data: {
+      nombre_completo,
+      fecha_nacimiento: new Date(fecha_nacimiento),
+    },
+  });
+
+  return updatedUser;
+};
+
+export const validatePassword = async (
+  inputPassword: string,
+  hashedPassword: string
+) => {
   return bcrypt.compare(inputPassword, hashedPassword);
 };
 
@@ -45,6 +73,41 @@ export const getUserById = async (id_usuario: number) => {
       email: true,
       telefono: true,
       fecha_nacimiento: true,
+    },
+  });
+};
+export const createUserWithGoogle = async (email: string, name: string) => {
+  return prisma.usuario.create({
+    data: {
+      email,
+      nombre_completo: name,
+      registrado_con: "google",
+      verificado: true,
+    },
+  });
+};
+
+export const findOrCreateGoogleUser = async (email: string, name: string) => {
+  const existingUser = await prisma.usuario.findUnique({ where: { email } });
+
+  if (existingUser) {
+    
+    if (existingUser && existingUser.registrado_con === "email") {
+      const error: any = new Error("Este correo ya está registrado con email.");
+      error.name = "EmailAlreadyRegistered";
+      throw error;
+    }
+
+    if (existingUser) return existingUser;
+
+  }
+
+  return prisma.usuario.create({
+    data: {
+      email,
+      nombre_completo: name,
+      registrado_con: "google",
+      verificado: true,
     },
   });
 };
