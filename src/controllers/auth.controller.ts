@@ -1,6 +1,9 @@
+import { PrismaClient } from '@prisma/client';
 import { Request, Response } from "express";
 import * as authService from "@/services/auth.service";
 import { updateGoogleProfile as updateGoogleProfileService } from "../services/auth.service";
+
+const prisma = new PrismaClient();
 
 export const register = async (req: Request, res: Response) => {
   const { nombre_completo, email, contraseña, fecha_nacimiento, telefono } =
@@ -63,6 +66,7 @@ export const login = async (req: Request, res: Response) => {
 
   try {
     const user = await authService.findUserByEmail(email);
+
     if (!user) {
       return res
         .status(401)
