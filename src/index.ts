@@ -5,6 +5,7 @@ import dotenv from 'dotenv';
 import passwordRoutes from './routes/password.routes';
 import authRoutes from './routes/auth.routes';
 import session from "express-session";
+import { frontendip } from './services/global.service';
 import passport from "passport";
 import "./config/googleAuth"; // <--- importante
 // Cargar variables de entorno
@@ -15,7 +16,7 @@ const PORT = process.env.PORT || 3001;
 
 // Middlewares
 app.use(cors({
-  origin: "http://localhost:3000", // tu frontend
+  origin: frontendip, // tu frontend
   credentials: true,               // 🔥 para enviar cookies/sesiones
 }));
 app.use(helmet());
