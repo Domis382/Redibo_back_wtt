@@ -16,7 +16,7 @@ const PORT = process.env.PORT || 3001;
 
 // Middlewares
 app.use(cors({
-  origin: frontendip, // tu frontend
+  origin: "http://34.69.214.55:3000", // tu frontend
   credentials: true,               // 🔥 para enviar cookies/sesiones
 }));
 app.use(helmet());
