@@ -19,16 +19,16 @@ router.get(
 );
 
 router.get(
-    '/auth/google/callback',
-    passport.authenticate('google', {
-      failureRedirect: frontendip + '?error=google',
-      session: true,
-    }),
-    (req, res) => {
-      // 🔥 Redirige al front para que abra el modal de completar perfil
-      res.redirect(frontendip + "/home?googleComplete=true");
-    }
-  );
+  "/auth/google/callback",
+  passport.authenticate("google", {
+    failureRedirect: "${frontendip()}?error=google",
+    session: true,
+  }),
+  (req, res) => {
+    // 🔥 Redirige al front para que abra el modal de completar perfil
+    res.redirect("${frontendip()}/home?googleComplete=true");
+  }
+);
 router.get("/auth/success", (req, res) => {
   res.send("Inicio de sesión con Google exitoso!");
 });
@@ -41,15 +41,14 @@ router.get("/auth/failure", (req, res) => {
 
 router.post("/register", validateRegister, register);
 router.post("/login", validateLogin, login);
-router.get('/user-profile/:id_usuario', getUserProfile);
+router.get("/user-profile/:id_usuario", getUserProfile);
 
 passport.authenticate("google", {
-    failureRedirect: frontendip+ "/home?error=cuentaExistente",
-    session: true,
-  }),
+  failureRedirect: "${frontendip()}/home?error=cuentaExistente",
+  session: true,
+}),
   (req, res) => {
-    res.redirect(frontendip + "/home?googleComplete=true");
-  }
-  
+    res.redirect("${frontendip()}/home?googleComplete=true");
+  };
 
 export default router;
