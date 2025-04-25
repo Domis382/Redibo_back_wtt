@@ -25,12 +25,12 @@ router.get(
 router.get(
     '/auth/google/callback',
     passport.authenticate('google', {
-      failureRedirect: 'http://localhost:3000?error=google',
+      failureRedirect: 'http://34.69.214.55:3000?error=google',
       session: true,
     }),
     (req, res) => {
       // 🔥 Redirige al front para que abra el modal de completar perfil
-      res.redirect("http://localhost:3000/home?googleComplete=true");
+      res.redirect("http://34.69.214.55:3000/home?googleComplete=true");
     }
   );
 router.get("/auth/success", (req, res) => {
@@ -50,11 +50,11 @@ router.get('/me', isAuthenticated, me);
 router.get('/user-profile/:id_usuario', getUserProfile);
 
 passport.authenticate("google", {
-    failureRedirect: "http://localhost:3000/home?error=cuentaExistente",
+    failureRedirect: "http://34.69.214.55:3000/home?error=cuentaExistente",
     session: true,
   }),
   (req, res) => {
-    res.redirect("http://localhost:3000/home?googleComplete=true");
+    res.redirect("http://34.69.214.55:3000/home?googleComplete=true");
   }
   
 

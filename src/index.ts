@@ -2,20 +2,20 @@ import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import dotenv from 'dotenv';
+dotenv.config();
 import passwordRoutes from './routes/password.routes';
 import authRoutes from './routes/auth.routes';
 import session from "express-session";
 import passport from "passport";
 import "./config/googleAuth"; // <--- importante
 // Cargar variables de entorno
-dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 3001;
 
 // Middlewares
 app.use(cors({
-  origin: "http://localhost:3000", // tu frontend
+  origin: "http://34.69.214.55:3000", // tu frontend
   credentials: true,               // 🔥 para enviar cookies/sesiones
 }));
 app.use(helmet());
