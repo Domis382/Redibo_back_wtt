@@ -1,6 +1,9 @@
 import { PrismaClient } from '@prisma/client';
 import { Request, Response } from "express";
 import * as authService from "@/services/auth.service";
+//Ingreso de token
+import { generateToken } from '@/utils/generateToken';
+
 import { updateGoogleProfile as updateGoogleProfileService } from "../services/auth.service";
 
 const prisma = new PrismaClient();
@@ -39,7 +42,8 @@ export const register = async (req: Request, res: Response) => {
 
 export const updateGoogleProfile = async (req: Request, res: Response) => {
   const { nombre_completo, fecha_nacimiento } = req.body;
-  const email = req.user?.email;
+  const email = (req.user as { email: string }).email;
+  //const email = req.user?.email;
 
   if (!email) {
     return res.status(401).json({ message: "Usuario no autenticado" });
@@ -79,12 +83,56 @@ export const login = async (req: Request, res: Response) => {
       return res.status(401).json({ message: "Los datos no son válidos" });
     }
 
-    return res.json({ message: "Login exitoso", user: { email: user.email } });
+    //Token
+    const token = generateToken({
+      id_usuario: user.id_usuario,
+      email: user.email,
+      nombre_completo: user.nombre_completo
+    });
+    return res.json({
+      message: "Login exitoso",
+      token,
+      user: {
+        email: user.email,
+        nombre_completo: user.nombre_completo
+      }
+    });
+    //Cambios por si no funciona lo que implemente
+    //return res.json({ message: "Login exitoso", user: { email: user.email } });
   } catch (error) {
     console.error(error);
     return res.status(500).json({ message: 'Error en el servidor' });
   }
 };
+
+
+export const me = async (req: Request, res: Response) => {
+  const { id_usuario } = req.user as { id_usuario: number };
+
+  try {
+    const user = await prisma.usuario.findUnique({
+      where: { id_usuario },
+      select: {
+        id_usuario: true,
+        nombre_completo: true,
+        email: true,
+        telefono: true,
+        fecha_nacimiento: true,
+      },
+    });
+
+    if (!user) {
+      return res.status(404).json({ message: 'Usuario no encontrado' });
+    }
+
+    return res.json({ user }); // 🔥 Ahora manda todos los datos al frontend
+  } catch (error) {
+    console.error('Error en /me:', error);
+    return res.status(500).json({ message: 'Error en el servidor' });
+  }
+};
+
+
 
 export const getUserProfile = async (req: Request, res: Response) => {
   const id_usuario = Number(req.params.id_usuario); // Aseguramos que sea número

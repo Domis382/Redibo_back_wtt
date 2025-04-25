@@ -5,6 +5,9 @@ import { validateRegister } from "@/middlewares/validateRegister"; // 👈 IMPOR
 import { validateLogin } from "@/middlewares/validateLogin";
 import passport from "passport";
 import { updateGoogleProfile } from "../controllers/auth.controller";
+
+import { me } from '@/controllers/auth.controller';
+import { isAuthenticated } from '@/middlewares/isAuthenticated';
 /* import { isAuthenticated } from "@/middlewares/isAuthenticated"; */
 
 
@@ -34,6 +37,7 @@ router.get("/auth/success", (req, res) => {
   res.send("Inicio de sesión con Google exitoso!");
 });
 
+
 router.patch("/update-profile", updateGoogleProfile);
 
 router.get("/auth/failure", (req, res) => {
@@ -42,6 +46,7 @@ router.get("/auth/failure", (req, res) => {
 
 router.post("/register", validateRegister, register);
 router.post("/login", validateLogin, login);
+router.get('/me', isAuthenticated, me);
 router.get('/user-profile/:id_usuario', getUserProfile);
 
 passport.authenticate("google", {

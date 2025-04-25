@@ -11,8 +11,8 @@ const prisma = new PrismaClient();
 const transporter = nodemailer.createTransport({
   service: 'gmail',
   auth: {
-    user: 'solizcespedesrodrigo1@gmail.com',
-    pass: 'ywkp ujdi qbuh bhlc',
+    user: 'rediboautos@gmail.com',
+    pass: 'btsf fxaf nrdc hrms',
   },
   tls: {
     rejectUnauthorized: false, // Esto ignora el error del certificado autofirmado
@@ -73,7 +73,7 @@ export const recoverPassword: RequestHandler = async (req, res) => {
     console.log('✅ Código de verificación actualizado:', updatedUser?.codigoVerificacion);
 
     await transporter.sendMail({
-      from: 'solizcespedesrodrigo1@gmail.com',
+      from: 'rediboautos@gmail.com',
       to: email,
       subject: 'Recuperación de contraseña',
       text: `Tu código de recuperación es: ${verificationCode}`,
