@@ -4,6 +4,12 @@ import * as authService from "@/services/auth.service";
 //Ingreso de token
 import { generateToken } from '@/utils/generateToken';
 
+
+//Foto de perfil
+import multer from 'multer';
+import path from 'path';
+import fs from 'fs';
+
 import { updateGoogleProfile as updateGoogleProfileService } from "../services/auth.service";
 
 const prisma = new PrismaClient();
@@ -118,6 +124,7 @@ export const me = async (req: Request, res: Response) => {
         email: true,
         telefono: true,
         fecha_nacimiento: true,
+        foto_perfil: true,
       },
     });
 
@@ -132,6 +139,91 @@ export const me = async (req: Request, res: Response) => {
   }
 };
 
+// ✅ Configuración de multer foto de perfil
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, 'uploads/'); // ✅ Carpeta donde se guardarán las imágenes
+  },
+  filename: (req, file, cb) => {
+    const ext = path.extname(file.originalname);
+    cb(null, `${Date.now()}-${file.fieldname}${ext}`);
+  }
+});
+//foto de perfil
+export const upload = multer({ 
+  storage,
+  limits: { fileSize: 2 * 1024 * 1024 }, // ✅ 2MB
+  fileFilter: (req, file, cb) => {
+    const allowedTypes = ['image/png'];
+    if (!allowedTypes.includes(file.mimetype)) {
+      return cb(new Error('Formato de imagen no válido. Usa PNG.'));
+    }
+    cb(null, true);
+  }
+});
+//perfil
+export const uploadProfilePhoto = async (req: Request, res: Response) => {
+  const { id_usuario } = req.user as { id_usuario: number };
+
+  if (!req.file) {
+    return res.status(400).json({ message: 'No se subió ninguna imagen.' });
+  }
+
+  const imagePath = `/uploads/${req.file.filename}`; // ✅ ruta para usar en frontend
+
+  try {
+    await prisma.usuario.update({
+      where: { id_usuario },
+      data: { foto_perfil: imagePath },
+    });
+
+    return res.json({
+      message: 'Foto de perfil actualizada exitosamente.',
+      foto_perfil: imagePath
+    });
+  } catch (error) {
+    console.error('Error al guardar la foto de perfil:', error);
+    return res.status(500).json({ message: 'Error al actualizar la foto de perfil.' });
+  }
+};
+//eliminar foto de perfil
+export const deleteProfilePhoto = async (req: Request, res: Response) => {
+  const { id_usuario } = req.user as { id_usuario: number };
+
+  try {
+    const user = await prisma.usuario.findUnique({
+      where: { id_usuario },
+      select: { foto_perfil: true }
+    });
+
+    if (!user || !user.foto_perfil) {
+      return res.status(400).json({ message: 'No hay foto para eliminar.' });
+    }
+
+    const filePath = path.join(__dirname, '../../', user.foto_perfil);
+
+    // ✅ 1. Elimina la foto física si existe
+    fs.unlink(filePath, (err) => {
+      if (err) {
+        console.error('Error eliminando el archivo:', err);
+        // No hacemos fail solo por esto, seguimos.
+      } else {
+        console.log('✅ Foto eliminada del servidor:', filePath);
+      }
+    });
+
+    // ✅ 2. Borra la referencia en la base de datos
+    await prisma.usuario.update({
+      where: { id_usuario },
+      data: { foto_perfil: null },
+    });
+
+    return res.json({ message: 'Foto de perfil eliminada exitosamente.' });
+  } catch (error) {
+    console.error('Error al eliminar la foto de perfil:', error);
+    return res.status(500).json({ message: 'Error al eliminar la foto.' });
+  }
+};
 
 
 export const getUserProfile = async (req: Request, res: Response) => {
@@ -159,6 +251,25 @@ export const getUserProfile = async (req: Request, res: Response) => {
   } catch (error) {
     console.error('Error al obtener el perfil:', error);
     return res.status(500).json({ message: 'Error en el servidor' });
+  }
+};
+
+export const checkPhoneExists = async (req: Request, res: Response) => {
+  const { telefono } = req.body;
+
+  if (!telefono) {
+    return res.status(400).json({ message: "Teléfono no proporcionado" });
+  }
+
+  try {
+    const user = await authService.findUserByPhone(telefono);
+    if (user) {
+      return res.json({ exists: true });
+    }
+    return res.json({ exists: false });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Error en el servidor" });
   }
 };
 

@@ -5,10 +5,14 @@ import { validateRegister } from "@/middlewares/validateRegister"; // 👈 IMPOR
 import { validateLogin } from "@/middlewares/validateLogin";
 import passport from "passport";
 import { updateGoogleProfile } from "../controllers/auth.controller";
-
+import { checkPhoneExists } from "@/controllers/auth.controller";
 import { me } from '@/controllers/auth.controller';
 import { isAuthenticated } from '@/middlewares/isAuthenticated';
 /* import { isAuthenticated } from "@/middlewares/isAuthenticated"; */
+
+//foto de perfil eliminar/actualizar
+import { deleteProfilePhoto, uploadProfilePhoto, upload } from '@/controllers/auth.controller';
+import { authMiddleware } from '@/middlewares/authMiddleware';
 
 
 const router = Router();
@@ -49,6 +53,13 @@ router.post("/login", validateLogin, login);
 router.get('/me', isAuthenticated, me);
 router.get('/user-profile/:id_usuario', getUserProfile);
 
+//foto de perfil actualizar/eliminar
+router.post('/upload-profile-photo', authMiddleware, upload.single('foto_perfil'), uploadProfilePhoto);
+router.delete('/delete-profile-photo',authMiddleware,deleteProfilePhoto);
+
+
+router.post("/check-phone", checkPhoneExists);
+
 passport.authenticate("google", {
     failureRedirect: "http://localhost:3000/home?error=cuentaExistente",
     session: true,
@@ -57,5 +68,4 @@ passport.authenticate("google", {
     res.redirect("http://localhost:3000/home?googleComplete=true");
   }
   
-
 export default router;
