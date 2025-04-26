@@ -2,13 +2,13 @@ import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import dotenv from 'dotenv';
+dotenv.config();
 import passwordRoutes from './routes/password.routes';
 import authRoutes from './routes/auth.routes';
 import session from "express-session";
 import passport from "passport";
 import "./config/googleAuth"; // <--- importante
 // Cargar variables de entorno
-dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 3001;
