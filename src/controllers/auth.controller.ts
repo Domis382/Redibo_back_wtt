@@ -162,6 +162,25 @@ export const getUserProfile = async (req: Request, res: Response) => {
   }
 };
 
+export const checkPhoneExists = async (req: Request, res: Response) => {
+  const { telefono } = req.body;
+
+  if (!telefono) {
+    return res.status(400).json({ message: "Teléfono no proporcionado" });
+  }
+
+  try {
+    const user = await authService.findUserByPhone(telefono);
+    if (user) {
+      return res.json({ exists: true });
+    }
+    return res.json({ exists: false });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Error en el servidor" });
+  }
+};
+
 
 
 

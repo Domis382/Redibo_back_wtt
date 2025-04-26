@@ -5,7 +5,7 @@ import { validateRegister } from "@/middlewares/validateRegister"; // 👈 IMPOR
 import { validateLogin } from "@/middlewares/validateLogin";
 import passport from "passport";
 import { updateGoogleProfile } from "../controllers/auth.controller";
-
+import { checkPhoneExists } from "@/controllers/auth.controller";
 import { me } from '@/controllers/auth.controller';
 import { isAuthenticated } from '@/middlewares/isAuthenticated';
 /* import { isAuthenticated } from "@/middlewares/isAuthenticated"; */
@@ -49,6 +49,8 @@ router.post("/login", validateLogin, login);
 router.get('/me', isAuthenticated, me);
 router.get('/user-profile/:id_usuario', getUserProfile);
 
+router.post("/check-phone", checkPhoneExists);
+
 passport.authenticate("google", {
     failureRedirect: "http://34.69.214.55:3000/home?error=cuentaExistente",
     session: true,
@@ -57,5 +59,4 @@ passport.authenticate("google", {
     res.redirect("http://34.69.214.55:3000/home?googleComplete=true");
   }
   
-
 export default router;
