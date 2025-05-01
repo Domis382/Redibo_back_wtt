@@ -6,6 +6,7 @@ import passwordRoutes from './routes/password.routes';
 import authRoutes from './routes/auth.routes';
 import session from "express-session";
 import passport from "passport";
+import vehiculoRoutes from './routes/vehiculo.routes';
 import "./config/googleAuth"; // <--- importante
 // Cargar variables de entorno
 dotenv.config();
@@ -35,9 +36,11 @@ app.use(
 );
 app.use(passport.initialize());
 app.use(passport.session());
+app.use('/uploads', express.static('uploads')); // Servir imágenes desde el servidor
 
 app.use('/api', authRoutes);
 app.use('/api', passwordRoutes);
+app.use(vehiculoRoutes);
 
 // End point para verificar la salud de la conexión de la API
 app.get("/health", (req, res) => {
@@ -47,3 +50,8 @@ app.get("/health", (req, res) => {
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
+
+
+
+
+

@@ -50,6 +50,14 @@ model Terminos_condiciones {
   usuario        Usuario @relation(fields: [id_usuario], references: [id_usuario])
 }
 
+model Vehiculo {
+  id        Int      @id @default(autoincrement())
+  placa     String   @unique
+  soat      String
+  imagenes  String[] // Guarda los nombres de los archivos
+  createdAt DateTime @default(now())
+}
+
 // Enum para registrado_con
 enum RegistradoCon {
   email
@@ -61,3 +69,4 @@ enum TipoVerificacion {
   recuperacion
   verificacion
 }
+
