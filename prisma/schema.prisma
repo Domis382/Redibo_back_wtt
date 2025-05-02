@@ -8,65 +8,141 @@ generator client {
 }
 
 model Usuario {
-  id_usuario       Int                  @id @default(autoincrement())
-  nombre_completo  String               @db.VarChar(100)
-  email            String               @unique @db.VarChar(100)
-  contraseña       String? @default("") @db.VarChar(255)
-  fecha_nacimiento DateTime?
-  telefono         Int?
-  registrado_con   RegistradoCon
-  fecha_registro   DateTime             @default(now())
-  verificado        Boolean   @default(false)   
-  host              Boolean   @default(false)
-  driver            Boolean   @default(false)
-
+  id_usuario        Int                   @id @default(autoincrement())
+  nombre_completo   String                @db.VarChar(100)
+  email             String                @unique @db.VarChar(100)
+  contraseña        String?               @default("") @db.VarChar(255)
+  fecha_nacimiento  DateTime?
+  telefono          Int?
+  registrado_con    RegistradoCon
+  fecha_registro    DateTime              @default(now())
+  verificado        Boolean               @default(false)
+  host              Boolean               @default(false)
+  driver            Boolean               @default(false)
   codigoVerificacion String?
-  isBlocked Boolean @default(false)
-  blockuntil DateTime?
-  failedCodeAttempts Int @default(0)
+  isBlocked         Boolean               @default(false)
+  blockuntil        DateTime?
+  failedCodeAttempts Int                  @default(0)
 
-  verificaciones   Verificaciones[]
+  verificaciones    Verificaciones[]
   terminosCondiciones Terminos_condiciones[]
+  metodosPago       MetodoPago[]
+  reservas          Reserva[]
+  vehiculos         Vehiculo[]
 }
 
 model Verificaciones {
-  id_codigo   Int       @id @default(autoincrement())
-  id_usuario Int
-  codigo      String    @db.VarChar(6)
+  id_codigo   Int               @id @default(autoincrement())
+  id_usuario  Int
+  codigo      String            @db.VarChar(6)
   tipo        TipoVerificacion
-  creado_en   DateTime  @default(now())
+  creado_en   DateTime          @default(now())
   expiracion  DateTime
-  usado       Boolean   @default(false)
+  usado       Boolean           @default(false)
 
-  usuario     Usuario   @relation(fields: [id_usuario], references: [id_usuario])
+  usuario     Usuario           @relation(fields: [id_usuario], references: [id_usuario])
 }
 
 model Terminos_condiciones {
-  id_aceptacion Int      @id @default(autoincrement())
-  id_usuario    Int
-  version_terminos String @db.VarChar(10)
-  fecha_aceptacion DateTime
+  id_aceptacion     Int      @id @default(autoincrement())
+  id_usuario        Int
+  version_terminos  String    @db.VarChar(10)
+  fecha_aceptacion  DateTime
 
-  usuario        Usuario @relation(fields: [id_usuario], references: [id_usuario])
+  usuario           Usuario   @relation(fields: [id_usuario], references: [id_usuario])
 }
 
 model Vehiculo {
   id        Int      @id @default(autoincrement())
+  id_usuario Int
   placa     String   @unique
   soat      String
-  imagenes  String[] // Guarda los nombres de los archivos
+  imagenes  String[] 
   createdAt DateTime @default(now())
+  
+  usuario   Usuario  @relation(fields: [id_usuario], references: [id_usuario])
+  reservas  Reserva[]
 }
 
-// Enum para registrado_con
+model MetodoPago {
+  id                Int            @id @default(autoincrement())
+  id_usuario        Int
+  tipo              TipoMetodoPago
+  numero_tarjeta    String?        @db.VarChar(16) 
+  fecha_expiracion  String?        @db.VarChar(5)  
+  titular           String?        @db.VarChar(100) 
+  detalles_metodo   String?        @db.Text         
+  imagen_qr         String?        @db.VarChar(255) 
+  fecha_registro    DateTime       @default(now())
+  activo            Boolean        @default(true)
+  predeterminado    Boolean        @default(false)
+  usuario           Usuario        @relation(fields: [id_usuario], references: [id_usuario])
+}
+
+model Reserva {
+  id                Int            @id @default(autoincrement())
+  id_vehiculo       Int
+  id_usuario_host   Int
+  id_usuario_cliente Int?         
+  fecha_inicio      DateTime
+  fecha_fin         DateTime
+  estado            EstadoReserva  @default(pendiente)
+  precio_total      Decimal        @db.Decimal(10, 2)
+  fecha_creacion    DateTime       @default(now())  
+  vehiculo          Vehiculo       @relation(fields: [id_vehiculo], references: [id])
+  host              Usuario        @relation(fields: [id_usuario_host], references: [id_usuario])  
+  transacciones     Transaccion[]
+}
+
+model Transaccion {
+  id                Int              @id @default(autoincrement())
+  id_reserva        Int?             
+  id_metodo_pago    Int
+  monto             Decimal          @db.Decimal(10, 2)
+  tipo_transaccion  TipoTransaccion
+  estado            EstadoTransaccion
+  referencia        String?          @db.VarChar(100) 
+  fecha_creacion    DateTime         @default(now())
+  fecha_actualizacion DateTime       @updatedAt
+  detalles          String?          @db.Text 
+  reserva           Reserva?         @relation(fields: [id_reserva], references: [id])
+  metodoPago        MetodoPago       @relation(fields: [id_metodo_pago], references: [id])
+}
+
+
 enum RegistradoCon {
   email
   google
 }
 
-// Enum para tipo en verificaciones
 enum TipoVerificacion {
   recuperacion
   verificacion
 }
 
+enum TipoMetodoPago {
+  tarjeta
+  efectivo
+  qr
+}
+
+enum EstadoReserva {
+  pendiente
+  confirmada
+  cancelada
+  completada
+}
+
+enum TipoTransaccion {
+  pago
+  reembolso
+  cargo_servicio
+  multa
+}
+
+enum EstadoTransaccion {
+  pendiente
+  completada
+  fallida
+  reembolsada
+}
