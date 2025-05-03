@@ -7,7 +7,7 @@ interface JwtPayload {
   nombre_completo: string;
 }
 
-export const authMiddleware = (req: Request, res: Response, next: NextFunction) => {
+export const authMiddleware = (req: Request, res: Response, next: NextFunction): Promise<void> => {
   const token = req.headers.authorization?.split(' ')[1];
 
   if (!token) {
