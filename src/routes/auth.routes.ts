@@ -66,11 +66,6 @@ router.post(
 );
 router.delete("/delete-profile-photo", authMiddleware, deleteProfilePhoto);
 
-//foto de perfil actualizar/eliminar
-router.post('/upload-profile-photo', authMiddleware, upload.single('foto_perfil'), uploadProfilePhoto);
-router.delete('/delete-profile-photo',authMiddleware,deleteProfilePhoto);
-
-
 router.post("/check-phone", checkPhoneExists);
 
 passport.authenticate("google", {
