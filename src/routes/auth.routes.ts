@@ -10,12 +10,22 @@ import { me } from '@/controllers/auth.controller';
 import { isAuthenticated } from '@/middlewares/isAuthenticated';
 /* import { isAuthenticated } from "@/middlewares/isAuthenticated"; */
 
+//foto de perfil eliminar/actualizar
+import { deleteProfilePhoto, uploadProfilePhoto, upload } from '@/controllers/auth.controller';
+import { authMiddleware } from '@/middlewares/authMiddleware';
+
+//Editar nombre completo
+import { updateUserField } from '@/controllers/auth.controller'; // 👈 IMPORTA
+
 
 const router = Router();
 
 /* router.patch("/update-profile", updateGoogleProfile); */
 
 router.post("/google/complete-profile", updateGoogleProfile);
+
+//nombre completo
+router.put('/user/update', authMiddleware, updateUserField);
 
 router.get(
   "/auth/google",
@@ -49,6 +59,11 @@ router.post("/login", validateLogin, login);
 router.get('/me', isAuthenticated, me);
 router.get('/user-profile/:id_usuario', getUserProfile);
 
+//foto de perfil actualizar/eliminar
+router.post('/upload-profile-photo', authMiddleware, upload.single('foto_perfil'), uploadProfilePhoto);
+router.delete('/delete-profile-photo',authMiddleware,deleteProfilePhoto);
+
+
 router.post("/check-phone", checkPhoneExists);
 
 passport.authenticate("google", {
@@ -58,5 +73,4 @@ passport.authenticate("google", {
   (req, res) => {
     res.redirect("http://localhost:3000/home?googleComplete=true");
   }
-  
 export default router;
