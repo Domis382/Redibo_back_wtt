@@ -20,6 +20,11 @@ model Usuario {
   host              Boolean   @default(false)
   driver            Boolean   @default(false)
 
+  codigoVerificacion String?
+  isBlocked Boolean @default(false)
+  blockuntil DateTime?
+  failedCodeAttempts Int @default(0)
+
   verificaciones   Verificaciones[]
   terminosCondiciones Terminos_condiciones[]
 }
