@@ -25,6 +25,8 @@ model Usuario {
   blockuntil DateTime?
   failedCodeAttempts Int @default(0)
 
+  foto_perfil String? @db.VarChar(255) // NUEVO: para guardar la ruta de la foto
+
   verificaciones   Verificaciones[]
   terminosCondiciones Terminos_condiciones[]
 }
