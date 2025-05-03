@@ -1,11 +1,8 @@
 import { PrismaClient } from '@prisma/client';
 import { Request, Response } from "express";
 import * as authService from "@/services/auth.service";
-//Ingreso de token
 import { generateToken } from '@/utils/generateToken';
 
-
-//Foto de perfil
 import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
@@ -49,7 +46,6 @@ export const register = async (req: Request, res: Response) => {
 export const updateGoogleProfile = async (req: Request, res: Response) => {
   const { nombre_completo, fecha_nacimiento } = req.body;
   const email = (req.user as { email: string }).email;
-  //const email = req.user?.email;
 
   if (!email) {
     return res.status(401).json({ message: "Usuario no autenticado" });
@@ -70,7 +66,6 @@ export const updateGoogleProfile = async (req: Request, res: Response) => {
   }
 };
 
-
 export const login = async (req: Request, res: Response) => {
   const { email, password } = req.body;
 
@@ -89,7 +84,6 @@ export const login = async (req: Request, res: Response) => {
       return res.status(401).json({ message: "Los datos no son válidos" });
     }
 
-    //Token
     const token = generateToken({
       id_usuario: user.id_usuario,
       email: user.email,
@@ -103,14 +97,11 @@ export const login = async (req: Request, res: Response) => {
         nombre_completo: user.nombre_completo
       }
     });
-    //Cambios por si no funciona lo que implemente
-    //return res.json({ message: "Login exitoso", user: { email: user.email } });
   } catch (error) {
     console.error(error);
     return res.status(500).json({ message: 'Error en el servidor' });
   }
 };
-
 
 export const me = async (req: Request, res: Response) => {
   const { id_usuario } = req.user as { id_usuario: number };
@@ -132,27 +123,26 @@ export const me = async (req: Request, res: Response) => {
       return res.status(404).json({ message: 'Usuario no encontrado' });
     }
 
-    return res.json({ user }); // 🔥 Ahora manda todos los datos al frontend
+    return res.json({ user });
   } catch (error) {
     console.error('Error en /me:', error);
     return res.status(500).json({ message: 'Error en el servidor' });
   }
 };
 
-// ✅ Configuración de multer foto de perfil
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, 'uploads/'); // ✅ Carpeta donde se guardarán las imágenes
+    cb(null, 'uploads/');
   },
   filename: (req, file, cb) => {
     const ext = path.extname(file.originalname);
     cb(null, `${Date.now()}-${file.fieldname}${ext}`);
   }
 });
-//foto de perfil
-export const upload = multer({ 
+
+export const upload = multer({
   storage,
-  limits: { fileSize: 2 * 1024 * 1024 }, // ✅ 2MB
+  limits: { fileSize: 2 * 1024 * 1024 },
   fileFilter: (req, file, cb) => {
     const allowedTypes = ['image/png'];
     if (!allowedTypes.includes(file.mimetype)) {
@@ -161,7 +151,7 @@ export const upload = multer({
     cb(null, true);
   }
 });
-//perfil
+
 export const uploadProfilePhoto = async (req: Request, res: Response) => {
   const { id_usuario } = req.user as { id_usuario: number };
 
@@ -169,7 +159,7 @@ export const uploadProfilePhoto = async (req: Request, res: Response) => {
     return res.status(400).json({ message: 'No se subió ninguna imagen.' });
   }
 
-  const imagePath = `/uploads/${req.file.filename}`; // ✅ ruta para usar en frontend
+  const imagePath = `/uploads/${req.file.filename}`;
 
   try {
     await prisma.usuario.update({
@@ -186,7 +176,7 @@ export const uploadProfilePhoto = async (req: Request, res: Response) => {
     return res.status(500).json({ message: 'Error al actualizar la foto de perfil.' });
   }
 };
-//eliminar foto de perfil
+
 export const deleteProfilePhoto = async (req: Request, res: Response) => {
   const { id_usuario } = req.user as { id_usuario: number };
 
@@ -202,17 +192,14 @@ export const deleteProfilePhoto = async (req: Request, res: Response) => {
 
     const filePath = path.join(__dirname, '../../', user.foto_perfil);
 
-    // ✅ 1. Elimina la foto física si existe
     fs.unlink(filePath, (err) => {
       if (err) {
         console.error('Error eliminando el archivo:', err);
-        // No hacemos fail solo por esto, seguimos.
       } else {
         console.log('✅ Foto eliminada del servidor:', filePath);
       }
     });
 
-    // ✅ 2. Borra la referencia en la base de datos
     await prisma.usuario.update({
       where: { id_usuario },
       data: { foto_perfil: null },
@@ -229,17 +216,16 @@ export const updateUserField = async (req: Request, res: Response) => {
   const { campo, valor } = req.body;
   const { id_usuario } = req.user as { id_usuario: number };
 
-  // Validamos la entrada
   if (!campo || !valor) {
     return res.status(400).json({ message: 'Campo y valor son obligatorios.' });
   }
 
-  // Lista de campos permitidos
   const camposPermitidos = ['nombre_completo', 'telefono'];
 
   if (!camposPermitidos.includes(campo)) {
     return res.status(400).json({ message: 'Campo no permitido.' });
   }
+
   if (campo === 'nombre_completo') {
     if (typeof valor !== 'string' || valor.length < 3 || valor.length > 50) {
       return res.status(400).json({ message: "El nombre debe tener entre 3 y 50 caracteres." });
@@ -258,19 +244,26 @@ export const updateUserField = async (req: Request, res: Response) => {
 
   if (campo === 'telefono') {
     const telefonoStr = valor.toString();
+
+    // ✅ Nueva validación añadida aquí
+    if (!/^[0-9]*$/.test(telefonoStr)) {
+      return res.status(400).json({ message: "Formato inválido, ingrese solo números." });
+    }
+
     if (!/^[0-9]{8}$/.test(telefonoStr)) {
       return res.status(400).json({ message: "El teléfono debe ser un número de 8 dígitos." });
     }
+
     if (!/^[67]/.test(telefonoStr)) {
       return res.status(400).json({ message: "El teléfono debe comenzar con 6 o 7." });
     }
   }
+
   try {
-    // Prisma: actualizamos el campo dinámicamente 👌
     const updatedUser = await prisma.usuario.update({
       where: { id_usuario },
       data: {
-        [campo]: campo === 'telefono' ? parseInt(valor, 10) : valor, // 👈 muy importante: guardar como número si es teléfono
+        [campo]: campo === 'telefono' ? parseInt(valor, 10) : valor,
       },
     });
 
@@ -288,20 +281,19 @@ export const updateUserField = async (req: Request, res: Response) => {
 };
 
 export const getUserProfile = async (req: Request, res: Response) => {
-  const id_usuario = Number(req.params.id_usuario); // Aseguramos que sea número
+  const id_usuario = Number(req.params.id_usuario);
 
   if (isNaN(id_usuario)) {
     return res.status(400).json({ message: 'ID de usuario inválido' });
   }
 
   try {
-    const user = await authService.getUserById(id_usuario); // Usamos el servicio
+    const user = await authService.getUserById(id_usuario);
 
     if (!user) {
       return res.status(404).json({ message: 'Usuario no encontrado' });
     }
 
-    // Devolvemos los datos sin contraseña ni campos sensibles
     return res.status(200).json({
       id_usuario: user.id_usuario,
       nombre_completo: user.nombre_completo,
