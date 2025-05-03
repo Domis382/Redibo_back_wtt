@@ -26,6 +26,7 @@ passport.use(
             data: {
               email,
               nombre_completo: profile.displayName || "",
+              registrado_con: "google", // ✅ campo obligatorio incluido
             },
           });
         }
