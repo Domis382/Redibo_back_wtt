@@ -73,5 +73,4 @@ passport.authenticate("google", {
   (req, res) => {
     res.redirect("http://localhost:3000/home?googleComplete=true");
   }
-  
 export default router;
