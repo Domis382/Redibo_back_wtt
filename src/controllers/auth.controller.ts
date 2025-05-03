@@ -1,6 +1,7 @@
 import { PrismaClient } from '@prisma/client';
 import { Request, Response } from "express";
 import * as authService from "@/services/auth.service";
+//Ingreso de token
 import { generateToken } from '@/utils/generateToken';
 
 import multer from 'multer';
@@ -46,6 +47,7 @@ export const register = async (req: Request, res: Response) => {
 export const updateGoogleProfile = async (req: Request, res: Response) => {
   const { nombre_completo, fecha_nacimiento } = req.body;
   const email = (req.user as { email: string }).email;
+  //const email = req.user?.email;
 
   if (!email) {
     return res.status(401).json({ message: "Usuario no autenticado" });
@@ -84,6 +86,7 @@ export const login = async (req: Request, res: Response) => {
       return res.status(401).json({ message: "Los datos no son válidos" });
     }
 
+    //Token
     const token = generateToken({
       id_usuario: user.id_usuario,
       email: user.email,
@@ -97,6 +100,8 @@ export const login = async (req: Request, res: Response) => {
         nombre_completo: user.nombre_completo
       }
     });
+    //Cambios por si no funciona lo que implemente
+    //return res.json({ message: "Login exitoso", user: { email: user.email } });
   } catch (error) {
     console.error(error);
     return res.status(500).json({ message: 'Error en el servidor' });
@@ -123,7 +128,7 @@ export const me = async (req: Request, res: Response) => {
       return res.status(404).json({ message: 'Usuario no encontrado' });
     }
 
-    return res.json({ user });
+    return res.json({ user }); // 🔥 Ahora manda todos los datos al frontend
   } catch (error) {
     console.error('Error en /me:', error);
     return res.status(500).json({ message: 'Error en el servidor' });
@@ -284,19 +289,20 @@ export const updateUserField = async (req: Request, res: Response) => {
 };
 
 export const getUserProfile = async (req: Request, res: Response) => {
-  const id_usuario = Number(req.params.id_usuario);
+  const id_usuario = Number(req.params.id_usuario); // Aseguramos que sea número
 
   if (isNaN(id_usuario)) {
     return res.status(400).json({ message: 'ID de usuario inválido' });
   }
 
   try {
-    const user = await authService.getUserById(id_usuario);
+    const user = await authService.getUserById(id_usuario); // Usamos el servicio
 
     if (!user) {
       return res.status(404).json({ message: 'Usuario no encontrado' });
     }
 
+    // Devolvemos los datos sin contraseña ni campos sensibles
     return res.status(200).json({
       id_usuario: user.id_usuario,
       nombre_completo: user.nombre_completo,

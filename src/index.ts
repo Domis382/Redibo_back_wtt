@@ -2,15 +2,16 @@ import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import dotenv from 'dotenv';
+dotenv.config();
 import passwordRoutes from './routes/password.routes';
 import authRoutes from './routes/auth.routes';
 import session from "express-session";
 import passport from "passport";
+import authRegistroHostRoutes from './routes/registroHost.routes';
 import "./config/googleAuth"; // <--- importante
 
 import path from 'path';
 // Cargar variables de entorno
-dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -47,9 +48,11 @@ app.use(
 );
 app.use(passport.initialize());
 app.use(passport.session());
+app.use('/uploads', express.static('uploads')); // Servir imágenes desde el servidor
 
 app.use('/api', authRoutes);
 app.use('/api', passwordRoutes);
+app.use('/api', authRegistroHostRoutes);
 
 // End point para verificar la salud de la conexión de la API
 app.get("/health", (req, res) => {
