@@ -176,7 +176,7 @@ export const uploadProfilePhoto = async (req: Request, res: Response) => {
     return res.status(500).json({ message: 'Error al actualizar la foto de perfil.' });
   }
 };
-
+//eliminar foto de perfil
 export const deleteProfilePhoto = async (req: Request, res: Response) => {
   const { id_usuario } = req.user as { id_usuario: number };
 
@@ -192,14 +192,17 @@ export const deleteProfilePhoto = async (req: Request, res: Response) => {
 
     const filePath = path.join(__dirname, '../../', user.foto_perfil);
 
+    // ✅ 1. Elimina la foto física si existe
     fs.unlink(filePath, (err) => {
       if (err) {
         console.error('Error eliminando el archivo:', err);
+        // No hacemos fail solo por esto, seguimos.
       } else {
         console.log('✅ Foto eliminada del servidor:', filePath);
       }
     });
 
+    // ✅ 2. Borra la referencia en la base de datos
     await prisma.usuario.update({
       where: { id_usuario },
       data: { foto_perfil: null },
