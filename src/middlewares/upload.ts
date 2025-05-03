@@ -2,21 +2,23 @@ import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
 
-// Función para sanitizar el nombre (quita espacios y caracteres especiales)
+// ✅ Función para sanitizar nombre de usuario
 const sanitize = (name: string) => {
-  return name.normalize("NFD").replace(/[\u0300-\u036f]/g, "") // quita acentos
-              .replace(/[^a-zA-Z0-9]/g, "_"); // reemplaza caracteres no válidos
+  return name.normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+              .replace(/[^a-zA-Z0-9]/g, "_");
 };
 
+// ✅ Configuración de almacenamiento dinámica
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     const user = req.user as { id_usuario: number; nombre_completo: string };
     const nombreSanitizado = sanitize(user.nombre_completo);
-    const tipo = req.body.tipo === 'qr' ? 'qr' : 'vehiculo';
+    
+    // Usa el campo del archivo para determinar la carpeta
+    const tipo = file.fieldname === 'qrImage' ? 'qr' : 'vehiculo';
 
     const dir = path.join('uploads', `usuario_${user.id_usuario}_${nombreSanitizado}`, tipo);
-
-    fs.mkdirSync(dir, { recursive: true }); // Crea la carpeta si no existe
+    fs.mkdirSync(dir, { recursive: true });
     cb(null, dir);
   },
   filename: (req, file, cb) => {
@@ -25,17 +27,24 @@ const storage = multer.diskStorage({
   },
 });
 
-export const subirImagenesVehiculo = multer({
+// ✅ Filtro de tipos de archivo
+const fileFilter = (req: any, file: Express.Multer.File, cb: multer.FileFilterCallback) => {
+  const allowed = ['image/jpeg', 'image/png'];
+  if (allowed.includes(file.mimetype)) {
+    cb(null, true);
+  } else {
+    cb(new Error('Formato de imagen inválido'));
+  }
+};
+
+// ✅ Exporta la instancia lista para .fields()
+const upload = multer({
   storage,
-  limits: { fileSize: 5 * 1024 * 1024 }, // 5 MB
-  fileFilter: (req, file, cb) => {
-    const allowed = ['image/jpeg', 'image/png'];
-    if (allowed.includes(file.mimetype)) {
-      cb(null, true);
-    } else {
-      cb(new Error('Formato de imagen inválido'));
-    }
-  },
-}).array('imagenes', 6);
+  fileFilter,
+  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB por archivo
+});
+
+export default upload;
+
 
 

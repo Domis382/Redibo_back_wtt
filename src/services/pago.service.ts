@@ -1,44 +1,39 @@
-import { PrismaClient, TipoMetodoPago } from '@prisma/client';
-
+import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
-export interface MetodoPagoDto {
+export const registrarHostCompleto = async (data: {
   id_usuario: number;
-  tipo: TipoMetodoPago;
+  placa: string;
+  soat: string;
+  imagenes: string[];
+  tipo: "tarjeta" | "qr" | "efectivo";
   numero_tarjeta?: string;
   fecha_expiracion?: string;
   titular?: string;
   imagen_qr?: string;
   detalles_metodo_pago?: string;
-}
+}) => {
+  const { id_usuario, ...resto } = data;
 
-export class PagoService {
-  async actualizarMetodoPago(data: MetodoPagoDto) {
-    return prisma.usuario.update({
-      where: { id_usuario: data.id_usuario },
+  return await prisma.$transaction([
+    prisma.vehiculo.create({
       data: {
-        metodo_pago_tipo: data.tipo,
-        numero_tarjeta: data.numero_tarjeta,
-        fecha_expiracion: data.fecha_expiracion,
-        titular: data.titular,
-        imagen_qr: data.imagen_qr,
-        detalles_metodo_pago: data.detalles_metodo_pago,
-        host: true,
+        placa: resto.placa,
+        soat: resto.soat,
+        imagenes: resto.imagenes,
+        usuario: { connect: { id_usuario } },
       },
-    });
-  }
-
-  async obtenerMetodoPago(id_usuario: number) {
-    return prisma.usuario.findUnique({
+    }),
+    prisma.usuario.update({
       where: { id_usuario },
-      select: {
-        metodo_pago_tipo: true,
-        numero_tarjeta: true,
-        fecha_expiracion: true,
-        titular: true,
-        imagen_qr: true,
-        detalles_metodo_pago: true,
+      data: {
+        metodo_pago_tipo: resto.tipo,
+        numero_tarjeta: resto.numero_tarjeta,
+        fecha_expiracion: resto.fecha_expiracion,
+        titular: resto.titular,
+        imagen_qr: resto.imagen_qr,
+        detalles_metodo_pago: resto.detalles_metodo_pago,
       },
-    });
-  }
-}
+    }),
+  ]);
+};
