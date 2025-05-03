@@ -25,8 +25,27 @@ model Usuario {
   blockuntil DateTime?
   failedCodeAttempts Int @default(0)
 
+  foto_perfil String? @db.VarChar(255) // NUEVO: para guardar la ruta de la foto
+
   verificaciones   Verificaciones[]
   terminosCondiciones Terminos_condiciones[]
+  vehiculos Vehiculo[]
+  // Método de pago directo
+  metodo_pago_tipo       TipoMetodoPago?
+  numero_tarjeta         String?        @db.VarChar(16)
+  fecha_expiracion       String?        @db.VarChar(5)
+  titular                String?        @db.VarChar(100)
+  imagen_qr              String?        @db.VarChar(255)
+  detalles_metodo_pago   String?        @db.Text
+}
+
+model Vehiculo {
+  id_vehiculo Int @id @default(autoincrement())
+  id_usuario  Int
+  placa       String @db.VarChar(10)
+  soat        String @db.VarChar(50)
+  imagenes    String[]  // aquí guardarías los nombres de archivos o rutas
+  usuario     Usuario @relation(fields: [id_usuario], references: [id_usuario])
 }
 
 model Verificaciones {
@@ -60,4 +79,10 @@ enum RegistradoCon {
 enum TipoVerificacion {
   recuperacion
   verificacion
+}
+
+enum TipoMetodoPago {
+  tarjeta
+  efectivo
+  qr
 }

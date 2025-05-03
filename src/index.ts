@@ -7,7 +7,10 @@ import passwordRoutes from './routes/password.routes';
 import authRoutes from './routes/auth.routes';
 import session from "express-session";
 import passport from "passport";
+import authRegistroHostRoutes from './routes/registroHost.routes';
 import "./config/googleAuth"; // <--- importante
+
+import path from 'path';
 // Cargar variables de entorno
 
 const app = express();
@@ -16,12 +19,22 @@ const PORT = process.env.PORT || 3001;
 // Middlewares
 app.use(cors({
   origin: "http://34.69.214.55:3000", // tu frontend
-  credentials: true,               // 🔥 para enviar cookies/sesiones
+  credentials: true,               // para enviar cookies/sesiones
 }));
-app.use(helmet());
+/*app.use(helmet());*/
+app.use(helmet({
+  crossOriginResourcePolicy: false, // Añade esto para permitir imágenes externas
+}));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+//foto de perfil
+/*app.use('/uploads', express.static('uploads'));*/
+app.use('/uploads', (req, res, next) => {
+  res.header('Access-Control-Allow-Origin', '*'); //permite desde cualquier origen
+  res.header('Access-Control-Allow-Methods', 'GET');
+  next();
+}, express.static(path.join(__dirname, '..', 'uploads')));
 app.use(
   session({
     secret: "mi_clave_secreta_segura", // cámbiala por algo más seguro
@@ -35,9 +48,11 @@ app.use(
 );
 app.use(passport.initialize());
 app.use(passport.session());
+app.use('/uploads', express.static('uploads')); // Servir imágenes desde el servidor
 
 app.use('/api', authRoutes);
 app.use('/api', passwordRoutes);
+app.use('/api', authRegistroHostRoutes);
 
 // End point para verificar la salud de la conexión de la API
 app.get("/health", (req, res) => {
