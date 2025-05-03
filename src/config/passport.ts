@@ -15,6 +15,10 @@ passport.use(
       try {
         const email = profile.emails?.[0].value;
 
+        if (!email) {
+          return done(new Error("No se pudo obtener el email del perfil de Google"), false);
+        }
+
         let user = await prisma.usuario.findUnique({ where: { email } });
 
         if (!user) {
