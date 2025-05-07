@@ -15,6 +15,11 @@ passport.use(
       try {
         const email = profile.emails?.[0].value;
 
+        // ✅ Validación obligatoria
+        if (!email) {
+          return done(new Error("No se pudo obtener el email del perfil de Google"), false);
+        }
+
         let user = await prisma.usuario.findUnique({ where: { email } });
 
         if (!user) {
@@ -22,6 +27,7 @@ passport.use(
             data: {
               email,
               nombre_completo: profile.displayName || "",
+              registrado_con: "google", // asegúrate que esto esté en tu modelo
             },
           });
         }
@@ -33,6 +39,7 @@ passport.use(
     }
   )
 );
+
 
 // 🟢 Serialización de sesión
 passport.serializeUser((user: any, done) => {
