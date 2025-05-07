@@ -18,7 +18,11 @@ model Usuario {
   fecha_registro   DateTime             @default(now())
   verificado        Boolean   @default(false)   
   host              Boolean   @default(false)
-  driver            Boolean   @default(false)
+  //driver            Boolean   @default(false)
+
+  driver             Driver?
+  assignedToDriver   Int?
+  driverReferente    Driver?          @relation("DriverToRenters", fields: [assignedToDriver], references: [id_usuario])
 
   codigoVerificacion String?
   isBlocked Boolean @default(false)
@@ -39,6 +43,7 @@ model Usuario {
   detalles_metodo_pago   String?        @db.Text
 }
 
+
 model Vehiculo {
   id_vehiculo Int @id @default(autoincrement())
   id_usuario  Int
@@ -47,6 +52,21 @@ model Vehiculo {
   imagenes    String[]  // aquí guardarías los nombres de archivos o rutas
   usuario     Usuario @relation(fields: [id_usuario], references: [id_usuario])
 }
+
+model Driver {
+  id_usuario        Int      @id
+  usuario           Usuario  @relation(fields: [id_usuario], references: [id_usuario])
+  
+  sexo              String
+  telefono          String
+  nro_licencia      String
+  categoria         String
+  fecha_emision     DateTime
+  fecha_vencimiento DateTime
+
+  renters           Usuario[] @relation("DriverToRenters") // lista de renters asignados
+}
+
 
 model Verificaciones {
   id_codigo   Int       @id @default(autoincrement())
