@@ -7,7 +7,7 @@ dotenv.config();
 
 import session from "express-session";
 import passport from "passport";
-import "./config/googleAuth";
+import "../src/config/googleAuth";
 
 import path from 'path';
 import passwordRoutes from '../src/routes/password.routes';
