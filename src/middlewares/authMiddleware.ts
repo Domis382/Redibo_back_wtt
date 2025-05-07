@@ -23,3 +23,8 @@ export const authMiddleware = (req: Request, res: Response, next: NextFunction):
     res.status(401).json({ message: 'Token inválido' });
   }
 };
+
+export const requireAuth = (req: Request, res: Response, next: NextFunction): void => {
+  // Middleware logic here
+  next();
+};
