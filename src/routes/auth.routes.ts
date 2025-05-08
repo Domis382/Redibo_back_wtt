@@ -1,21 +1,21 @@
 // src/routes/auth.routes.ts
 import { Router } from "express";
-import { register, login, getUserProfile } from "@/controllers/auth.controller"; // 👈 IMPORTA BIEN AQUÍ
-import { validateRegister } from "@/middlewares/validateRegister"; // 👈 IMPORTAR middleware de validación
-import { validateLogin } from "@/middlewares/validateLogin";
+import { register, login, getUserProfile } from "../controllers/auth.controller"; // 👈 IMPORTA BIEN AQUÍ
+import { validateRegister } from "../middlewares/validateRegister"; // 👈 IMPORTAR middleware de validación
+import { validateLogin } from "../middlewares/validateLogin";
 import passport from "passport";
 import { updateGoogleProfile } from "../controllers/auth.controller";
-import { checkPhoneExists } from "@/controllers/auth.controller";
-import { me } from "@/controllers/auth.controller";
-import { isAuthenticated } from "@/middlewares/isAuthenticated";
-/* import { isAuthenticated } from "@/middlewares/isAuthenticated"; */
+import { checkPhoneExists } from "../controllers/auth.controller";
+import { me } from "../controllers/auth.controller";
+import { isAuthenticated } from "../middlewares/isAuthenticated";
+/* import { isAuthenticated } from "../middlewares/isAuthenticated"; */
 
 //foto de perfil eliminar/actualizar
-import {deleteProfilePhoto,uploadProfilePhoto,upload,} from "@/controllers/auth.controller";
-import { authMiddleware } from "@/middlewares/authMiddleware";
+import {deleteProfilePhoto,uploadProfilePhoto,upload,} from "../controllers/auth.controller";
+import { authMiddleware } from "../middlewares/authMiddleware";
 
 //Editar nombre completo
-import { updateUserField } from "@/controllers/auth.controller"; // 👈 IMPORTA
+import { updateUserField } from "../controllers/auth.controller"; // 👈 IMPORTA
 
 const router = Router();
 
