@@ -15,12 +15,14 @@ export const registrarDriverController = async (req: Request, res: Response): Pr
 
     if (!Array.isArray(rentersIds) || rentersIds.length === 0) {
       res.status(400).json({ message: 'Debes seleccionar al menos un renter' });
+      console.log("🔴 Respuesta del backend:", res.status);
       return;
     }
 
     const usuario = req.user;
     if (!usuario || typeof usuario !== 'object' || !('id_usuario' in usuario) || typeof usuario.id_usuario !== 'string') {
       res.status(401).json({ message: 'Usuario no autenticado' });
+      console.log("🔴 Respuesta del backend:", res.status);
       return;
     }
 
@@ -40,5 +42,6 @@ export const registrarDriverController = async (req: Request, res: Response): Pr
   } catch (error) {
     console.error('Error en registrarDriverController:', error);
     res.status(500).json({ message: 'Error al registrar driver', error: String(error) });
+    console.log("🔴 Respuesta del backend:", res.status);
   }
 };
