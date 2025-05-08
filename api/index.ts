@@ -1,4 +1,3 @@
-// api/index.ts
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
@@ -8,16 +7,12 @@ dotenv.config();
 import session from "express-session";
 import passport from "passport";
 
-// ❌ Antes (causa error en Vercel)
-// import "@/config/googleAuth";
-// ✅ Después
+
 import "../src/config/googleAuth";
 
 import path from 'path';
 
-// ❌ Alias
-// import authRoutes from '@/routes/auth.routes';
-// ✅ Relativo
+
 import authRoutes from '../src/routes/auth.routes';
 import passwordRoutes from '../src/routes/password.routes';
 import authRegistroHostRoutes from '../src/routes/registroHost.routes';
@@ -63,5 +58,4 @@ app.get("/health", (req, res) => {
   res.status(200).json({ status: "ok" });
 });
 
-// ✅ Para Vercel: no uses app.listen()
 export default app;
