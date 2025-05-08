@@ -7,11 +7,19 @@ dotenv.config();
 
 import session from "express-session";
 import passport from "passport";
+
+// ❌ Antes (causa error en Vercel)
+// import "@/config/googleAuth";
+// ✅ Después
 import "../src/config/googleAuth";
 
 import path from 'path';
-import passwordRoutes from '../src/routes/password.routes';
+
+// ❌ Alias
+// import authRoutes from '@/routes/auth.routes';
+// ✅ Relativo
 import authRoutes from '../src/routes/auth.routes';
+import passwordRoutes from '../src/routes/password.routes';
 import authRegistroHostRoutes from '../src/routes/registroHost.routes';
 
 const app = express();
@@ -43,6 +51,7 @@ app.use(
     },
   })
 );
+
 app.use(passport.initialize());
 app.use(passport.session());
 
@@ -54,5 +63,5 @@ app.get("/health", (req, res) => {
   res.status(200).json({ status: "ok" });
 });
 
-// 👇 ¡IMPORTANTE! NO usar listen() en Vercel
+// ✅ Para Vercel: no uses app.listen()
 export default app;
