@@ -25,6 +25,7 @@
   "dependencies": {
     "@prisma/client": "^6.6.0",
     "@sendgrid/mail": "^8.1.5",
+    "@vercel/node": "^5.1.15",
     "bcrypt": "^5.1.1",
     "bcryptjs": "^3.0.2",
     "cors": "^2.8.5",
