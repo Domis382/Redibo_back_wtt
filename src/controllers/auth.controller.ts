@@ -135,9 +135,28 @@ export const me = async (req: Request, res: Response) => {
   }
 };
 
-const storage = multer.diskStorage({
+/*const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     cb(null, 'uploads/');
+  },
+  filename: (req, file, cb) => {
+    const ext = path.extname(file.originalname);
+    cb(null, `${Date.now()}-${file.fieldname}${ext}`);
+  }
+});*/
+
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+  const { id_usuario, nombre_completo } = req.user as { id_usuario: number, nombre_completo: string };
+
+// Limpia el nombre para que no tenga espacios ni caracteres raros
+  const nombreCarpeta = nombre_completo.trim().replace(/\s+/g, '_').replace(/[^\w\-]/g, '');
+  const folderPath = path.join(__dirname, '../../uploads/foto_perfil_usuario', `usuario_${id_usuario}_${nombreCarpeta}`);
+
+    // Crea la carpeta si no existe
+    fs.mkdirSync(folderPath, { recursive: true });
+
+    cb(null, folderPath);
   },
   filename: (req, file, cb) => {
     const ext = path.extname(file.originalname);
@@ -158,14 +177,15 @@ export const upload = multer({
 });
 
 export const uploadProfilePhoto = async (req: Request, res: Response) => {
-  const { id_usuario } = req.user as { id_usuario: number };
-
+  const { id_usuario, nombre_completo } = req.user as { id_usuario: number, nombre_completo: string };
   if (!req.file) {
     return res.status(400).json({ message: 'No se subió ninguna imagen.' });
   }
 
-  const imagePath = `/uploads/${req.file.filename}`;
-
+  //const imagePath = `/uploads/${req.file.filename}`;
+  const nombreCarpeta = nombre_completo.trim().replace(/\s+/g, '_').replace(/[^\w\-]/g, '');
+  const folderUrl = `/uploads/foto_perfil_usuario/usuario_${id_usuario}_${nombreCarpeta}`;
+  const imagePath = `${folderUrl}/${req.file.filename}`;
   try {
     await prisma.usuario.update({
       where: { id_usuario },
@@ -181,6 +201,7 @@ export const uploadProfilePhoto = async (req: Request, res: Response) => {
     return res.status(500).json({ message: 'Error al actualizar la foto de perfil.' });
   }
 };
+
 //eliminar foto de perfil
 export const deleteProfilePhoto = async (req: Request, res: Response) => {
   const { id_usuario } = req.user as { id_usuario: number };
@@ -201,9 +222,18 @@ export const deleteProfilePhoto = async (req: Request, res: Response) => {
     fs.unlink(filePath, (err) => {
       if (err) {
         console.error('Error eliminando el archivo:', err);
-        // No hacemos fail solo por esto, seguimos.
       } else {
         console.log('✅ Foto eliminada del servidor:', filePath);
+    
+        // ✅ 2. Si la carpeta queda vacía, la eliminamos
+        const userFolder = path.dirname(filePath);
+        fs.readdir(userFolder, (err, files) => {
+          if (!err && files.length === 0) {
+            fs.rmdir(userFolder, (err) => {
+              if (err) console.error('Error eliminando carpeta vacía:', err);
+            });
+          }
+        });
       }
     });
 
@@ -228,7 +258,7 @@ export const updateUserField = async (req: Request, res: Response) => {
     return res.status(400).json({ message: 'Campo y valor son obligatorios.' });
   }
 
-  const camposPermitidos = ['nombre_completo', 'telefono'];
+  const camposPermitidos = ['nombre_completo', 'telefono', 'fecha_nacimiento'];
 
   if (!camposPermitidos.includes(campo)) {
     return res.status(400).json({ message: 'Campo no permitido.' });
@@ -266,17 +296,30 @@ export const updateUserField = async (req: Request, res: Response) => {
       return res.status(400).json({ message: "El teléfono debe comenzar con 6 o 7." });
     }
   }
-
+  if (campo === 'fecha_nacimiento') {
+    const fechaValida = Date.parse(valor);
+    if (isNaN(fechaValida)) {
+      return res.status(400).json({ message: "Fecha inválida." });
+    }
+  }
   try {
     const updatedUser = await prisma.usuario.update({
       where: { id_usuario },
       data: {
-        [campo]: campo === 'telefono' ? parseInt(valor, 10) : valor,
+        [campo]: campo === 'telefono' 
+        ? parseInt(valor, 10) 
+        : campo === 'fecha_nacimiento'
+        ? new Date(valor)
+        : valor,
       },
     });
 
     return res.json({
-      message: `${campo === 'nombre_completo' ? 'Nombre' : 'Teléfono'} actualizado correctamente`,
+      message: `${
+        campo === 'nombre_completo' ? 'Nombre' :
+        campo === 'telefono' ? 'Teléfono' :
+        'Fecha de nacimiento'
+      } actualizado correctamente`,
       user: {
         id_usuario: updatedUser.id_usuario,
         [campo]: (updatedUser as any)[campo],
@@ -334,68 +377,3 @@ export const checkPhoneExists = async (req: Request, res: Response) => {
     return res.status(500).json({ message: "Error en el servidor" });
   }
 };
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/*import { PrismaClient } from '@prisma/client';
-import { Request, Response } from 'express';
-
-import bcrypt from 'bcryptjs'; // 👈 Importar bcrypt
-
-const prisma = new PrismaClient();
-
-export const register = async (req: Request, res: Response) => {
-  const { nombre_completo, email, contraseña, fecha_nacimiento, telefono} = req.body;
-  
-
-  try {
-
-    if (!nombre_completo || !email || !contraseña || !fecha_nacimiento) {
-      return res.status(400).json({ message: "Todos los campos obligatorios deben estar completos." });
-    }
-
-    const existingUser = await prisma.usuario.findUnique({
-      where: { email },
-    });
-
-    if (existingUser) {
-      return res.status(400).json({ message: "El correo electrónico ya está registrado." });
-    }
-
-    // 🔒 ENCRIPTAR LA CONTRASEÑA AQUÍ
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(contraseña, salt);
-
-    // 🔥 GUARDAR LA CONTRASEÑA ENCRIPTADA
-    const newUser = await prisma.usuario.create({
-      data: {
-        nombre_completo,
-        email,
-        contraseña: hashedPassword, // 👈 Aquí guardamos la contraseña encriptada
-        fecha_nacimiento: new Date(fecha_nacimiento),
-        telefono: telefono ? Number(telefono) : null,
-        registrado_con: "email",
-        verificado: false,
-        host: false,
-        driver: false,
-      },
-    });
-
-    return res.status(201).json({ message: "Usuario registrado exitosamente", user: { email: newUser.email } });
-  }catch (error) {
-    console.error(error);
-    return res.status(500).json({ message: "Error en el servidor" });
-  }
-};*/
