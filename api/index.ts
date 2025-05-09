@@ -1,4 +1,3 @@
-// api/index.ts
 import app from '../src/app';
 import { NowRequest, NowResponse } from '@vercel/node';
 
