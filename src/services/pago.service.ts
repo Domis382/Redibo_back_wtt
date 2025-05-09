@@ -33,6 +33,7 @@ export const registrarHostCompleto = async (data: {
         titular: resto.titular,
         imagen_qr: resto.imagen_qr,
         detalles_metodo_pago: resto.detalles_metodo_pago,
+        host: true,
       },
     }),
   ]);
