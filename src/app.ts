@@ -62,4 +62,8 @@ app.get("/health", (req, res) => {
   res.status(200).json({ status: "ok" });
 });
 
+app.get("/puta", (req, res) => {
+  res.status(200).json({ "que gei" });
+});
+
 export default app;
