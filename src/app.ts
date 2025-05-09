@@ -54,6 +54,10 @@ app.use('/api', authRoutes);
 app.use('/api', passwordRoutes);
 app.use('/api', authRegistroHostRoutes);
 
+app.get('/', (req, res) => {
+  res.send('¡Hola desde la página principal!');
+});
+
 app.get("/health", (req, res) => {
   res.status(200).json({ status: "ok" });
 });
