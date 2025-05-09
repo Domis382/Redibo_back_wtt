@@ -6,11 +6,6 @@ const prisma = new PrismaClient();
 export const obtenerRentersDisponibles = async (req: Request, res: Response) => {
   try {
     const renters = await prisma.usuario.findMany({
-      where: {
-        host: false,
-        driver: null,
-        isBlocked: false
-      },
       select: {
         id_usuario: true,
         nombre_completo: true,
@@ -22,7 +17,7 @@ export const obtenerRentersDisponibles = async (req: Request, res: Response) => 
 
     res.json(renters);
   } catch (error) {
-    console.error('Error al obtener renters:', error);
-    res.status(500).json({ message: 'Error al obtener renters' });
+    console.error('Error al obtener usuarios:', error);
+    res.status(500).json({ message: 'Error al obtener usuarios' });
   }
 };
