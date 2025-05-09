@@ -20,14 +20,19 @@ export const registrarDriverController = async (req: Request, res: Response): Pr
     }
 
     const usuario = req.user;
-    if (!usuario || typeof usuario !== 'object' || !('id_usuario' in usuario) || typeof usuario.id_usuario !== 'string') {
-      res.status(401).json({ message: 'Usuario no autenticado' });
-      console.log("🔴 Respuesta del backend:", res.status);
-      return;
-    }
+      if (
+        !usuario ||
+        typeof usuario !== "object" ||
+        !("id_usuario" in usuario)
+      ) {
+        console.error("Usuario no autenticado o inválido:", usuario);
+        console.log("🔴 Respuesta del backend:", res.status);
+        return ;
+      }
+
 
     await registrarDriverCompleto({
-      id_usuario: Number(usuario.id_usuario),
+      id_usuario: Number((usuario as any).id_usuario),
       sexo,
       telefono,
       nro_licencia,
