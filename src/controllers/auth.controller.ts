@@ -415,6 +415,7 @@ export const checkPhoneExists = async (req: Request, res: Response): Promise<voi
     const user = await authService.findUserByPhone(telefono);
     if (user) {
        res.json({ exists: true });
+       return;
     }
      res.json({ exists: false });
   } catch (error) {
