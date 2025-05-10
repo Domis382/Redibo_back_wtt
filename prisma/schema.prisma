@@ -26,7 +26,10 @@ model Usuario {
   failedCodeAttempts Int @default(0)
 
   foto_perfil String? @db.VarChar(255) // NUEVO: para guardar la ruta de la foto
-
+  ediciones_nombre  Int       @default(0)
+  ediciones_fecha   Int       @default(0)
+  ediciones_telefono Int      @default(0)
+  
   verificaciones   Verificaciones[]
   terminosCondiciones Terminos_condiciones[]
   vehiculos Vehiculo[]
