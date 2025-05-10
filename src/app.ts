@@ -20,7 +20,7 @@ import authRegistroHostRoutes from '../src/routes/registroHost.routes';
 const app = express();
 
 app.use(cors({
-  origin: "http://redibo-front-wtt.vercel.app/",
+  origin: "http://redibo-front-wtt.vercel.app",
   credentials: true,
 }));
 app.use(helmet({
