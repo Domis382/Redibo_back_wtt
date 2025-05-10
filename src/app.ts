@@ -20,7 +20,7 @@ import authRegistroHostRoutes from '../src/routes/registroHost.routes';
 const app = express();
 
 app.use(cors({
-  origin: "http://34.69.214.55:3000",
+  origin: "http://redibo.chickenkiller.com:3000",
   credentials: true,
 }));
 app.use(helmet({
