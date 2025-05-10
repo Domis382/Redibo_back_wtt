@@ -44,10 +44,7 @@ router.get("/auth/success", (req, res) => {
   res.send("Inicio de sesión con Google exitoso!");
 });
 
-router.patch('/update-profile', (req, res, next) => {
-  console.log("🔍 req.user:", req.user);
-  next();
-}, updateGoogleProfile);
+router.patch('/update-profile', isAuthenticated, updateGoogleProfile);
 
 router.get("/auth/failure", (req, res) => {
   res.send("Fallo al iniciar sesión con Google.");

@@ -44,6 +44,7 @@ export const register = async (req: Request, res: Response): Promise<void> => {
 };
 
 export const updateGoogleProfile = async (req: Request, res: Response): Promise<void> => {
+  console.log("📍 REQ.USER:", req.user);
   const { nombre_completo, fecha_nacimiento } = req.body;
   const email = (req.user as { email: string }).email;
 
