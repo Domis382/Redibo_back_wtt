@@ -10,18 +10,27 @@ passport.use(
     {
       clientID: process.env.GOOGLE_CLIENT_ID || "",
       clientSecret: process.env.GOOGLE_CLIENT_SECRET || "",
-      callbackURL: "https://redibo-back-wtt.vercel.app/api/auth/google/callback",
+      callbackURL:
+        "https://redibo-back-wtt.vercel.app/api/auth/google/callback",
     },
-
     async (_accessToken, _refreshToken, profile, done) => {
-      console.log("🔵 Iniciando autenticación Google - Perfil recibido:", JSON.stringify(profile, null, 2)); // 👈 Log 1
+      console.log("CLIENT_ID:", process.env.GOOGLE_CLIENT_ID);
+      console.log("CLIENT_SECRET:", process.env.GOOGLE_CLIENT_SECRET);
+
+      console.log(
+        "🔵 Iniciando autenticación Google - Perfil recibido:",
+        JSON.stringify(profile, null, 2)
+      ); // 👈 Log 1
       try {
         const email = profile.emails?.[0].value;
         const name = profile.displayName;
 
         console.log("📧 Email obtenido de Google:", email); // 👈 Log 2
         if (!email)
-          return done(new Error("No se pudo obtener el email de Google"), false);
+          return done(
+            new Error("No se pudo obtener el email de Google"),
+            false
+          );
         console.log("🔄 Buscando/creando usuario en DB...");
         const user = await findOrCreateGoogleUser(email, name);
 
