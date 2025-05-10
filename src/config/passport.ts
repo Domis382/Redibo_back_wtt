@@ -1,4 +1,4 @@
-import passport from "passport";
+/* import passport from "passport";
 import { PrismaClient } from "@prisma/client";
 import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 
@@ -54,3 +54,4 @@ passport.deserializeUser(async (email: string, done) => {
     done(err, null);
   }
 });
+ */
