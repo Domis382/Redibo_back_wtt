@@ -19,7 +19,7 @@ const app = express();
 
 app.use(
   cors({
-    origin: "http://redibo.chickenkiller.com:3000",
+    origin: "http://redibo-front-wtt.vercel.app",
     credentials: true,
   })
 );
