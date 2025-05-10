@@ -14,13 +14,15 @@ passport.use(
     },
 
     async (_accessToken, _refreshToken, profile, done) => {
+      console.log("🔵 Iniciando autenticación Google - Perfil recibido:", JSON.stringify(profile, null, 2)); // 👈 Log 1
       try {
         const email = profile.emails?.[0].value;
         const name = profile.displayName;
 
+        console.log("📧 Email obtenido de Google:", email); // 👈 Log 2
         if (!email)
           return done(new Error("No se pudo obtener el email de Google"), false);
-
+        console.log("🔄 Buscando/creando usuario en DB...");
         const user = await findOrCreateGoogleUser(email, name);
 
         if (!user.id_usuario) {
@@ -29,6 +31,7 @@ passport.use(
           });
         }
 
+        console.log("✅ Usuario autenticado:", JSON.stringify(user, null, 2));
         return done(null, user);
       } catch (error: any) {
         if (error.name === "EmailAlreadyRegistered") {
