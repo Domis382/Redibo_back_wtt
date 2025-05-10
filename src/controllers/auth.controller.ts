@@ -137,27 +137,14 @@ export const me = async (req: Request, res: Response): Promise<void> => {
   }
 };
 
-/*const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, 'uploads/');
-  },
-  filename: (req, file, cb) => {
-    const ext = path.extname(file.originalname);
-    cb(null, `${Date.now()}-${file.fieldname}${ext}`);
-  }
-});*/
-
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-  const { id_usuario, nombre_completo } = req.user as { id_usuario: number, nombre_completo: string };
+    const { id_usuario, nombre_completo } = req.user as { id_usuario: number, nombre_completo: string };
 
-// Limpia el nombre para que no tenga espacios ni caracteres raros
-  const nombreCarpeta = nombre_completo.trim().replace(/\s+/g, '_').replace(/[^\w\-]/g, '');
-  const folderPath = path.join(__dirname, '../../uploads/foto_perfil_usuario', `usuario_${id_usuario}_${nombreCarpeta}`);
+    const safeName = nombre_completo.trim().replace(/\s+/g, '_').replace(/[^\w\-]/g, '');
+    const folderPath = path.join('/tmp', 'foto_perfil_usuario', `usuario_${id_usuario}_${safeName}`);
 
-    // Crea la carpeta si no existe
-    fs.mkdirSync(folderPath, { recursive: true });
-
+    fs.mkdirSync(folderPath, { recursive: true }); // ✅ ahora sí funcionará
     cb(null, folderPath);
   },
   filename: (req, file, cb) => {
@@ -165,6 +152,7 @@ const storage = multer.diskStorage({
     cb(null, `${Date.now()}-${file.fieldname}${ext}`);
   }
 });
+
 
 export const upload = multer({
   storage,
