@@ -13,6 +13,8 @@ export const registrarDriverCompleto = async (data: {
   categoria: string;
   fecha_emision: Date;
   fecha_vencimiento: Date;
+  anversoUrl: string;
+  reversoUrl: string;
   rentersIds: number[]; // IDs de usuarios que serán renters de este driver
 }) => {
   const {
@@ -23,6 +25,8 @@ export const registrarDriverCompleto = async (data: {
     categoria,
     fecha_emision,
     fecha_vencimiento,
+    anversoUrl,
+    reversoUrl,
     rentersIds
   } = data;
 
@@ -40,7 +44,9 @@ export const registrarDriverCompleto = async (data: {
         nro_licencia,
         categoria,
         fecha_emision,
-        fecha_vencimiento
+        fecha_vencimiento,
+        anversoUrl,
+        reversoUrl
       }
     }),
 

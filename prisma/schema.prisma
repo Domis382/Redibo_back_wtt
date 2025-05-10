@@ -61,6 +61,8 @@ model Driver {
   categoria         String
   fecha_emision     DateTime
   fecha_vencimiento DateTime
+  anversoUrl        String
+  reversoUrl        String
 
   renters Usuario[] @relation("DriverToRenters") // lista de renters asignados
 }

@@ -10,6 +10,8 @@ export const registrarDriverController = async (req: Request, res: Response): Pr
       categoria,
       fecha_emision,
       fecha_vencimiento,
+      anversoUrl,
+      reversoUrl,
       rentersIds
     } = req.body;
 
@@ -39,6 +41,8 @@ export const registrarDriverController = async (req: Request, res: Response): Pr
       categoria,
       fecha_emision: new Date(fecha_emision),
       fecha_vencimiento: new Date(fecha_vencimiento),
+      anversoUrl,
+      reversoUrl,
       rentersIds
     });
 
