@@ -253,7 +253,7 @@ export const deleteProfilePhoto = async (req: Request, res: Response): Promise<v
   }
 };
 
-export const updateUserField = async (req: Request, res: Response) => {
+export const updateUserField = async (req: Request, res: Response): Promise<void> => {
   const { campo, valor }: { campo: CampoEditable; valor: string } = req.body;
   const { id_usuario } = req.user as { id_usuario: number };
 
@@ -284,18 +284,18 @@ export const updateUserField = async (req: Request, res: Response) => {
     }) as any;
 
     if (!user) {
-      return res.status(404).json({ message: 'Usuario no encontrado' });
+       res.status(404).json({ message: 'Usuario no encontrado' });
     }
 
     if (user[campoContador] >= 3) {
-      return res.status(403).json({ message: 'Has alcanzado el límite de 3 ediciones para este campo. Para más cambios, contacta al soporte.' });
+       res.status(403).json({ message: 'Has alcanzado el límite de 3 ediciones para este campo. Para más cambios, contacta al soporte.' });
     }
 
     const valorActual = user[campo];
     const nuevoValor = campo === 'telefono' ? parseInt(valor, 10) : campo === 'fecha_nacimiento' ? new Date(valor) : valor;
 
     if (valorActual?.toString() === nuevoValor?.toString()) {
-      return res.status(200).json({
+       res.status(200).json({
         message: 'No hubo cambios en el valor.',
         edicionesRestantes: 3 - user[campoContador]
       });
@@ -304,37 +304,37 @@ export const updateUserField = async (req: Request, res: Response) => {
     // Validaciones personalizadas
     if (campo === 'nombre_completo') {
       if (typeof valor !== 'string' || valor.length < 3 || valor.length > 50) {
-        return res.status(400).json({ message: 'El nombre debe tener entre 3 y 50 caracteres.' });
+         res.status(400).json({ message: 'El nombre debe tener entre 3 y 50 caracteres.' });
       }
       const soloLetrasRegex = /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]*$/;
       if (!soloLetrasRegex.test(valor)) {
-        return res.status(400).json({ message: 'El nombre solo puede contener letras y espacios.' });
+         res.status(400).json({ message: 'El nombre solo puede contener letras y espacios.' });
       }
       if (/\s{2,}/.test(valor)) {
-        return res.status(400).json({ message: 'El nombre no debe tener más de un espacio consecutivo.' });
+         res.status(400).json({ message: 'El nombre no debe tener más de un espacio consecutivo.' });
       }
       if (/^\s|\s$/.test(valor)) {
-        return res.status(400).json({ message: 'El nombre no debe comenzar ni terminar con espacios.' });
+         res.status(400).json({ message: 'El nombre no debe comenzar ni terminar con espacios.' });
       }
     }
 
     if (campo === 'telefono') {
       const telefonoStr = valor.toString();
       if (!/^[0-9]*$/.test(telefonoStr)) {
-        return res.status(400).json({ message: 'Formato inválido, ingrese solo números.' });
+         res.status(400).json({ message: 'Formato inválido, ingrese solo números.' });
       }
       if (!/^[0-9]{8}$/.test(telefonoStr)) {
-        return res.status(400).json({ message: 'El teléfono debe ser un número de 8 dígitos.' });
+         res.status(400).json({ message: 'El teléfono debe ser un número de 8 dígitos.' });
       }
       if (!/^[67]/.test(telefonoStr)) {
-        return res.status(400).json({ message: 'El teléfono debe comenzar con 6 o 7.' });
+         res.status(400).json({ message: 'El teléfono debe comenzar con 6 o 7.' });
       }
     }
 
     if (campo === 'fecha_nacimiento') {
       const fechaValida = Date.parse(valor);
       if (isNaN(fechaValida)) {
-        return res.status(400).json({ message: 'Fecha inválida.' });
+         res.status(400).json({ message: 'Fecha inválida.' });
       }
     }
 
@@ -354,7 +354,7 @@ export const updateUserField = async (req: Request, res: Response) => {
       infoExtra = 'Has alcanzado el límite de 3 ediciones para este campo.';
     }
 
-    return res.json({
+     res.json({
       message: `$${
         campo === 'nombre_completo' ? 'Nombre' :
         campo === 'telefono' ? 'Teléfono' :
