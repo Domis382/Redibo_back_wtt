@@ -19,8 +19,6 @@ import { updateUserField } from "../controllers/auth.controller"; // 👈 IMPORT
 
 const router = Router();
 
-/* router.patch("/update-profile", updateGoogleProfile); */
-
 router.post("/google/complete-profile", updateGoogleProfile);
 
 //nombre completo
@@ -46,7 +44,7 @@ router.get("/auth/success", (req, res) => {
   res.send("Inicio de sesión con Google exitoso!");
 });
 
-router.patch("/update-profile", updateGoogleProfile);
+router.patch("/update-profile", authMiddleware, updateGoogleProfile);
 
 router.get("/auth/failure", (req, res) => {
   res.send("Fallo al iniciar sesión con Google.");
