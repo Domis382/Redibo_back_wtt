@@ -8,7 +8,9 @@ import authRoutes from './routes/auth.routes';
 import session from "express-session";
 import passport from "passport";
 import authRegistroHostRoutes from './routes/registroHost.routes';
+import authRegistroDriverRoutes from './routes/registroDriver.routes'; // Import the driver routes
 import "./config/googleAuth"; // <--- importante
+import usuarioRoutes from '@/routes/usuario.routes';
 
 import path from 'path';
 // Cargar variables de entorno
@@ -53,6 +55,9 @@ app.use('/uploads', express.static('uploads')); // Servir imágenes desde el ser
 app.use('/api', authRoutes);
 app.use('/api', passwordRoutes);
 app.use('/api', authRegistroHostRoutes);
+app.use('/api', authRegistroDriverRoutes); // Añadir la ruta de registro de driver aquí
+app.use('/api', usuarioRoutes); // Añadir la ruta de usuario aquí
+
 
 // End point para verificar la salud de la conexión de la API
 app.get("/health", (req, res) => {
