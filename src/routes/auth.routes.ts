@@ -30,7 +30,7 @@ router.get(
   passport.authenticate("google", { scope: ["profile", "email"] })
 );
 
-router.get(
+/* router.get(
   "/auth/google/callback",
   passport.authenticate("google", {
     failureRedirect: "http://34.69.214.55:3000?error=google",
@@ -40,7 +40,26 @@ router.get(
     // 🔥 Redirige al front para que abra el modal de completar perfil
     res.redirect("http://34.69.214.55:3000/home?googleComplete=true");
   }
+); */
+
+router.get(
+  "/auth/google/callback",
+  passport.authenticate("google", {
+    failureRedirect: "http://34.69.214.55:3000/home?error=cuentaExistente",
+    session: false, // 👈 IMPORTANTE: no uses sesiones, usas JWT
+  }),
+  (req, res) => {
+    const user = req.user as { id_usuario: number; email: string; nombre_completo: string };
+    const token = generateToken({
+      id_usuario: user.id_usuario,
+      email: user.email,
+      nombre_completo: user.nombre_completo,
+    });
+
+    res.redirect(`http://34.69.214.55:3000/home?googleComplete=true&token=${token}&email=${user.email}`);
+  }
 );
+
 router.get("/auth/success", (req, res) => {
   res.send("Inicio de sesión con Google exitoso!");
 });
@@ -66,22 +85,4 @@ router.post(
 router.delete("/delete-profile-photo", authMiddleware, deleteProfilePhoto);
 
 router.post("/check-phone", checkPhoneExists);
-
-router.get(
-  "/auth/google/callback",
-  passport.authenticate("google", {
-    failureRedirect: "http://34.69.214.55:3000/home?error=cuentaExistente",
-    session: false, // 👈 IMPORTANTE: no uses sesiones, usas JWT
-  }),
-  (req, res) => {
-    const user = req.user as { id_usuario: number; email: string; nombre_completo: string };
-    const token = generateToken({
-      id_usuario: user.id_usuario,
-      email: user.email,
-      nombre_completo: user.nombre_completo,
-    });
-
-    res.redirect(`http://34.69.214.55:3000/home?googleComplete=true&token=${token}&email=${user.email}`);
-  }
-);
 export default router;
