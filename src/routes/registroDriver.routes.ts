@@ -1,6 +1,6 @@
 import { Router } from 'express';
-import { registrarDriverController } from '@/controllers/authRegistroDriver/registroDriver.controller';
-import { requireAuth } from '@/middlewares/authMiddleware';
+import { registrarDriverController } from '../controllers/authRegistroDriver/registroDriver.controller';
+import { requireAuth } from '../middlewares/authMiddleware';
 
 const router = Router();
 
