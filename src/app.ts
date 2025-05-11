@@ -14,8 +14,11 @@ import path from "path";
 import authRoutes from "../src/routes/auth.routes";
 import passwordRoutes from "../src/routes/password.routes";
 import authRegistroHostRoutes from "../src/routes/registroHost.routes";
+import authRegistroDriverRoutes from './routes/registroDriver.routes'; // Import the driver routes
+import usuarioRoutes from '@/routes/usuario.routes';
 
 const app = express();
+/* const PORT = process.env.PORT || 3001; */
 
 app.use(
   cors({
@@ -58,10 +61,13 @@ app.use(
 
 app.use(passport.initialize());
 app.use(passport.session());
+app.use('/uploads', express.static('uploads')); // Servir imágenes desde el servidor
 
 app.use("/api", authRoutes);
 app.use("/api", passwordRoutes);
 app.use("/api", authRegistroHostRoutes);
+app.use('/api', authRegistroDriverRoutes); // Añadir la ruta de registro de driver aquí
+app.use('/api', usuarioRoutes); // Añadir la ruta de usuario aquí
 
 app.get("/", (req, res) => {
   res.send("¡Hola desde la página principal!");
