@@ -15,7 +15,7 @@ import authRoutes from "../src/routes/auth.routes";
 import passwordRoutes from "../src/routes/password.routes";
 import authRegistroHostRoutes from "../src/routes/registroHost.routes";
 import authRegistroDriverRoutes from './routes/registroDriver.routes'; // Import the driver routes
-import usuarioRoutes from '@/routes/usuario.routes';
+import usuarioRoutes from './routes/usuario.routes';
 
 const app = express();
 /* const PORT = process.env.PORT || 3001; */
