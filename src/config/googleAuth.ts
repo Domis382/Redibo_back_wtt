@@ -2,6 +2,7 @@ import passport from "passport";
 import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 import { PrismaClient } from "@prisma/client";
 import { findOrCreateGoogleUser } from "../services/auth.service";
+import jwt from "jsonwebtoken"; // 👈 Asegúrate de importar esto
 
 const prisma = new PrismaClient();
 
@@ -14,13 +15,12 @@ passport.use(
         "https://redibo-back-wtt.vercel.app/api/auth/google/callback",
     },
     async (_accessToken, _refreshToken, profile, done) => {
-      console.log("CLIENT_ID:", process.env.GOOGLE_CLIENT_ID);
-      console.log("CLIENT_SECRET:", process.env.GOOGLE_CLIENT_SECRET);
 
       console.log(
         "🔵 Iniciando autenticación Google - Perfil recibido:",
         JSON.stringify(profile, null, 2)
       ); // 👈 Log 1
+
       try {
         const email = profile.emails?.[0].value;
         const name = profile.displayName;
@@ -40,12 +40,27 @@ passport.use(
           });
         }
 
-        console.log("✅ Usuario autenticado:", JSON.stringify(user, null, 2));
+         // ✅ Generar JWT manual
+        const token = jwt.sign(
+          {
+            id_usuario: user.id_usuario,
+            email: user.email,
+            nombre_completo: user.nombre_completo,
+          },
+          process.env.JWT_SECRET!,
+          { expiresIn: "24h" }
+        );
+
+        console.log("✅ Usuario autenticado y token generado");
+
+        // ✅ Devolver token junto con usuario
         return done(null, user);
       } catch (error: any) {
         if (error.name === "EmailAlreadyRegistered") {
           return done(null, false, { message: error.message });
         }
+
+        
 
         return done(error, undefined);
       }

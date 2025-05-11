@@ -16,6 +16,7 @@ import { authMiddleware } from "../middlewares/authMiddleware";
 
 //Editar nombre completo
 import { updateUserField } from "../controllers/auth.controller"; // 👈 IMPORTA
+import { generateToken } from "../utils/generateToken"; // Asegúrate de tener esto arriba
 
 const router = Router();
 
@@ -70,10 +71,17 @@ router.get(
   "/auth/google/callback",
   passport.authenticate("google", {
     failureRedirect: "http://34.69.214.55:3000/home?error=cuentaExistente",
-    session: true,
+    session: false, // 👈 IMPORTANTE: no uses sesiones, usas JWT
   }),
   (req, res) => {
-    res.redirect("http://34.69.214.55:3000/home?googleComplete=true");
+    const user = req.user as { id_usuario: number; email: string; nombre_completo: string };
+    const token = generateToken({
+      id_usuario: user.id_usuario,
+      email: user.email,
+      nombre_completo: user.nombre_completo,
+    });
+
+    res.redirect(`http://34.69.214.55:3000/home?googleComplete=true&token=${token}&email=${user.email}`);
   }
 );
 export default router;
