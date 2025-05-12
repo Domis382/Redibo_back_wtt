@@ -2,7 +2,7 @@ import passport from "passport";
 import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 import { PrismaClient } from "@prisma/client";
 import { findOrCreateGoogleUser } from "../services/auth.service";
-import jwt from "jsonwebtoken"; // 👈 Asegúrate de importar esto
+import { generateToken } from "../utils/generateToken";
 
 const prisma = new PrismaClient();
 
@@ -34,38 +34,38 @@ passport.use(
         console.log("🔄 Buscando/creando usuario en DB...");
         const user = await findOrCreateGoogleUser(email, name);
 
-        if (!user.id_usuario) {
-          return done(null, false, {
-            message: "No se pudo obtener el ID del usuario",
-          });
-        }
+        if (user.registrado_con === "email") {
+          console.warn("⚠️ Correo ya registrado manualmente:", email);
 
-         // ✅ Generar JWT manual
-        const token = jwt.sign(
-          {
+          const token = generateToken({
             id_usuario: user.id_usuario,
             email: user.email,
             nombre_completo: user.nombre_completo,
-          },
-          process.env.JWT_SECRET!,
-          { expiresIn: "24h" }
-        );
+          });
 
         console.log("✅ Usuario autenticado y token generado");
 
         // ✅ Devolver token junto con usuario
+        return done(null, false, {
+            message: "alreadyExists",
+            token,
+            email,
+          });
+        }
+
+        // ✅ Usuario nuevo o registrado con Google
         return done(null, user);
       } catch (error: any) {
+        console.error("❌ Error en GoogleStrategy:", error);
         if (error.name === "EmailAlreadyRegistered") {
           return done(null, false, { message: error.message });
         }
-
-        
 
         return done(error, undefined);
       }
     }
   )
+  
 );
 
 passport.serializeUser((user: any, done) => {

@@ -45,18 +45,30 @@ router.get(
 router.get(
   "/auth/google/callback",
   passport.authenticate("google", {
-    failureRedirect: "http://34.69.214.55:3000/home?error=cuentaExistente",
-    session: false, // 👈 IMPORTANTE: no uses sesiones, usas JWT
+    failureRedirect: "http://34.69.214.55:3000/home?error=google",
+    session: false, // 👈 Usamos JWT, no sesiones
   }),
   (req, res) => {
     const user = req.user as { id_usuario: number; email: string; nombre_completo: string };
+    const info = req.authInfo as { message?: string };
+
     const token = generateToken({
       id_usuario: user.id_usuario,
       email: user.email,
       nombre_completo: user.nombre_completo,
     });
 
-    res.redirect(`http://34.69.214.55:3000/home?googleComplete=true&token=${token}&email=${user.email}`);
+    // ✅ Caso: cuenta ya registrada previamente
+    if (info?.message === "alreadyExists") {
+      return res.redirect(
+        `http://34.69.214.55:3000/home?googleAutoLogin=true&token=${token}&email=${user.email}`
+      );
+    }
+
+    // ✅ Caso: cuenta nueva, requiere completar perfil
+    return res.redirect(
+      `http://34.69.214.55:3000/home?googleComplete=true&token=${token}&email=${user.email}`
+    );
   }
 );
 
