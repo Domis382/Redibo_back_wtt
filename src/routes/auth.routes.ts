@@ -57,8 +57,8 @@ router.get(
     console.log("ℹ️  info:", info);
 
     // ✅ Caso: cuenta ya registrada previamente
-    if (info?.message === "alreadyExists" && info.token && info.email) {
-      console.log("⚠️ Usuario ya registrado manualmente. Enviando login automático.");
+    if (info?.message === "alreadyExists" || info?.message === "loginWithGoogle") {
+      console.log("⚠️ Usuario ya registrado. Enviando login automático.");
       return res.redirect(
         `http://34.69.214.55:3000/home?googleAutoLogin=true&token=${info.token}&email=${info.email}`
       );
@@ -72,7 +72,7 @@ router.get(
     });
 
     console.log("🧩 Usuario nuevo, redirigiendo a completar perfil");
-    
+
     return res.redirect(
       `http://34.69.214.55:3000/home?googleComplete=true&token=${token}&email=${user.email}`
     );
