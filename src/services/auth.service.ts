@@ -96,7 +96,7 @@ export const findOrCreateGoogleUser = async (email: string, name: string) => {
       email: existingUser.email,
       registrado_con: existingUser.registrado_con,
     });
-    if (existingUser && existingUser.registrado_con === "email") {
+    if (existingUser.registrado_con === "email") {
       console.warn("⚠️ Ya registrado manualmente, lanzando error especial");
       const error: any = new Error("Este correo ya está registrado con email.");
       error.name = "EmailAlreadyRegistered";
@@ -104,8 +104,7 @@ export const findOrCreateGoogleUser = async (email: string, name: string) => {
     }
 
     console.log("✅ Usuario ya registrado con Google, retornando");
-    if (existingUser) return existingUser;
-
+    return existingUser;
   }
 
   console.log("🆕 Usuario no existe, creando uno nuevo con Google");

@@ -49,19 +49,15 @@ router.get(
     session: false,
   }),
   (req, res) => {
+    const info = req.authInfo as any;
     const user = req.user as any;
-    const info = req.authInfo as {
-      message?: string;
-      token?: string;
-      email?: string;
-    };
-
+    
     console.log("🔁 CALLBACK GOOGLE:");
     console.log("👤 user:", user);
     console.log("ℹ️  info:", info);
 
     // ✅ Caso: cuenta ya registrada previamente
-    if (!user && info?.message === "alreadyExists") {
+    if (info?.message === "alreadyExists" && info.token && info.email) {
       console.log("⚠️ Usuario ya registrado manualmente. Enviando login automático.");
       return res.redirect(
         `http://34.69.214.55:3000/home?googleAutoLogin=true&token=${info.token}&email=${info.email}`
@@ -76,6 +72,7 @@ router.get(
     });
 
     console.log("🧩 Usuario nuevo, redirigiendo a completar perfil");
+    
     return res.redirect(
       `http://34.69.214.55:3000/home?googleComplete=true&token=${token}&email=${user.email}`
     );
