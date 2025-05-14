@@ -49,8 +49,8 @@ router.get(
     session: false,
   }),
   (req, res) => {
-    const info = req.authInfo as any;
-    const user = req.user as any;
+    const user = req.user as { id_usuario: number; email: string; nombre_completo: string };
+    const info = req.authInfo as { message?: string; token?: string; email?: string };
     
     console.log("🔁 CALLBACK GOOGLE:");
     console.log("👤 user:", user);

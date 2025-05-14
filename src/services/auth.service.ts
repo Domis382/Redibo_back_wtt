@@ -37,7 +37,6 @@ export const updateGoogleProfile = async (
   nombre_completo: string,
   fecha_nacimiento: string
 ) => {
-
   const existingUser = await prisma.usuario.findUnique({
     where: { email },
   });
@@ -67,7 +66,8 @@ export const validatePassword = async (
 export const getUserById = async (id_usuario: number) => {
   return await prisma.usuario.findUnique({
     where: { id_usuario }, // Asegúrate que en Prisma el campo se llame id_usuario
-    select: { // Evita traer la contraseña u otros campos sensibles
+    select: {
+      // Evita traer la contraseña u otros campos sensibles
       id_usuario: true,
       nombre_completo: true,
       email: true,
@@ -104,11 +104,11 @@ export const findOrCreateGoogleUser = async (email: string, name: string) => {
     }
 
     console.log("✅ Usuario ya registrado con Google, retornando");
-    return existingUser;
+    return { user: existingUser, isNew: false };
   }
 
   console.log("🆕 Usuario no existe, creando uno nuevo con Google");
-  return prisma.usuario.create({
+  const newUser = await prisma.usuario.create({
     data: {
       email,
       nombre_completo: name,
@@ -116,6 +116,7 @@ export const findOrCreateGoogleUser = async (email: string, name: string) => {
       verificado: true,
     },
   });
+  return { user: newUser, isNew: true };
 };
 
 export const findUserByPhone = async (telefono: number) => {

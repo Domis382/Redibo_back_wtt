@@ -35,13 +35,13 @@ passport.use(
             false
           );
         console.log("🔄 Buscando/creando usuario en DB...");
-        const user = await findOrCreateGoogleUser(email, name);
+        const { user, isNew } = await findOrCreateGoogleUser(email, name);
 
         const token = generateToken({
-            id_usuario: user.id_usuario,
-            email: user.email,
-            nombre_completo: user.nombre_completo,
-          });
+          id_usuario: user.id_usuario,
+          email: user.email,
+          nombre_completo: user.nombre_completo,
+        });
 
         if (user.registrado_con === "email") {
           console.warn("⚠️ Correo ya registrado manualmente:", email);
@@ -57,11 +57,14 @@ passport.use(
         }
 
         // ✅ Usuario nuevo o registrado con Google
-        return done(null, user, {
-          message: "loginWithGoogle",
-          token,
-          email,
-        });
+        if (!isNew) {
+          console.log("🔄 Usuario ya registrado con Google");
+          return done(null, user, { message: "loginWithGoogle", token, email });
+        }
+
+        // ✅ Usuario nuevo
+        console.log("🆕 Usuario creado con Google");
+        return done(null, user); // sin info extra, se redirige a completar perfil
       } catch (error: any) {
         console.error("❌ Error en GoogleStrategy:", error);
         if (error.name === "EmailAlreadyRegistered") {
