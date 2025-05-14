@@ -33,19 +33,19 @@ router.get(
 /* router.get(
   "/auth/google/callback",
   passport.authenticate("google", {
-    failureRedirect: "http://34.69.214.55:3000?error=google",
+    failureRedirect: "http://34.10.219.81:3000?error=google",
     session: true,
   }),
   (req, res) => {
     // 🔥 Redirige al front para que abra el modal de completar perfil
-    res.redirect("http://34.69.214.55:3000/home?googleComplete=true");
+    res.redirect("http://34.10.219.81:3000/home?googleComplete=true");
   }
 ); */
 
 router.get(
   "/auth/google/callback",
   passport.authenticate("google", {
-    failureRedirect: "http://34.69.214.55:3000/home?error=google",
+    failureRedirect: "http://34.10.219.81:3000/home?error=google",
     session: false,
   }),
   (req, res) => {
@@ -60,7 +60,7 @@ router.get(
     if (info?.message === "alreadyExists" || info?.message === "loginWithGoogle") {
       console.log("⚠️ Usuario ya registrado. Enviando login automático.");
       return res.redirect(
-        `http://34.69.214.55:3000/home?googleAutoLogin=true&token=${info.token}&email=${info.email}`
+        `http://34.10.219.81:3000/home?googleAutoLogin=true&token=${info.token}&email=${info.email}`
       );
     }
 
@@ -74,7 +74,7 @@ router.get(
     console.log("🧩 Usuario nuevo, redirigiendo a completar perfil");
 
     return res.redirect(
-      `http://34.69.214.55:3000/home?googleComplete=true&token=${token}&email=${user.email}`
+      `http://34.10.219.81:3000/home?googleComplete=true&token=${token}&email=${user.email}`
     );
   }
 );
