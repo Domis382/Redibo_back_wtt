@@ -12,6 +12,7 @@ passport.use(
       callbackURL: "https://redibo-back-wtt.vercel.app/api/auth/google/callback",
     },
     async (accessToken, refreshToken, profile, done) => {
+      console.log("🔵 Iniciando autenticación Google - Perfil recibido:", JSON.stringify(profile, null, 2)); // 👈 Log 1
       try {
         const email = profile.emails?.[0].value;
 
