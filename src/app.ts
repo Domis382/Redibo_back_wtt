@@ -15,10 +15,12 @@ import authRoutes from "../src/routes/auth.routes";
 import passwordRoutes from "../src/routes/password.routes";
 import authRegistroHostRoutes from "../src/routes/registroHost.routes";
 import authRegistroDriverRoutes from './routes/registroDriver.routes'; // Import the driver routes
+import "./config/googleAuth"; // <--- importante
 import usuarioRoutes from './routes/usuario.routes';
+import visualizarDriverRoutes from "./routes/visualizarDriver.routes";
 
 const app = express();
-/* const PORT = process.env.PORT || 3001; */
+const PORT = process.env.PORT || 3001;
 
 app.use(
   cors({
@@ -68,6 +70,7 @@ app.use("/api", passwordRoutes);
 app.use("/api", authRegistroHostRoutes);
 app.use('/api', authRegistroDriverRoutes); // Añadir la ruta de registro de driver aquí
 app.use('/api', usuarioRoutes); // Añadir la ruta de usuario aquí
+app.use('/api', visualizarDriverRoutes);// Añadir la ruta de visualizar driver aquí
 
 app.get("/", (req, res) => {
   res.send("¡Hola desde la página principal!");
