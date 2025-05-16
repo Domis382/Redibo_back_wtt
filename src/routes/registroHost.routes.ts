@@ -5,7 +5,6 @@ import upload from '../middlewares/upload';
 
 const router = express.Router();
 
-
 router.post(
   '/registro-host',
   requireAuth,
