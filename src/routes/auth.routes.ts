@@ -8,7 +8,7 @@ import { updateGoogleProfile } from "../controllers/auth.controller";
 import { checkPhoneExists } from "../controllers/auth.controller";
 import { me } from "../controllers/auth.controller";
 import { isAuthenticated } from "../middlewares/isAuthenticated";
-/* import { isAuthenticated } from "../middlewares/isAuthenticated"; */
+import { deleteIncompleteUserController } from "../controllers/auth.controller";
 
 //foto de perfil eliminar/actualizar
 import {deleteProfilePhoto,uploadProfilePhoto,upload,} from "../controllers/authPerfilUsuarioRenter/fotoPerfil.controller";
@@ -103,6 +103,8 @@ router.post(
   uploadProfilePhoto
 );
 router.delete("/delete-profile-photo", authMiddleware, deleteProfilePhoto);
+
+router.delete("/delete-incomplete-user", deleteIncompleteUserController);
 
 router.post("/check-phone", checkPhoneExists);
 export default router;

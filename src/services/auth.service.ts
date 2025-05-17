@@ -119,6 +119,8 @@ export const findOrCreateGoogleUser = async (email: string, name: string) => {
   return { user: newUser, isNew: true };
 };
 
+
+
 export const findUserByPhone = async (telefono: number) => {
   return prisma.usuario.findFirst({ where: { telefono } });
 };
