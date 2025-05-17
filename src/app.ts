@@ -1,4 +1,4 @@
-import express from "express";
+import express, { Request, Response, NextFunction } from "express";
 import cors from "cors";
 import helmet from "helmet";
 import dotenv from "dotenv";
@@ -22,18 +22,26 @@ import visualizarDriverRoutes from "./routes/visualizarDriver.routes";
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-app.use(
-  cors({
-    origin: "http://34.10.219.81:3000",
-    credentials: true,
-  })
-);
+// ✅ CORS robusto – que responde incluso si hay error
+app.use((req: express.Request, res: express.Response, next: express.NextFunction): void => {
+  res.header("Access-Control-Allow-Origin", "http://34.10.219.81:3000");
+  res.header("Access-Control-Allow-Credentials", "true");
+  res.header(
+    "Access-Control-Allow-Headers",
+    "Origin, X-Requested-With, Content-Type, Accept, Authorization"
+  );
+  res.header("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE, OPTIONS");
 
-app.use(
-  helmet({
-    crossOriginResourcePolicy: false,
-  })
-);
+  if (req.method === "OPTIONS") {
+    res.sendStatus(200);
+    return;
+  }
+
+  next();
+});
+
+// Middlewares
+app.use(helmet({ crossOriginResourcePolicy: false }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
