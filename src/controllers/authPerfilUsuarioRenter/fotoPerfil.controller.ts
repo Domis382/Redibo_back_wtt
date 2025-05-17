@@ -2,27 +2,13 @@
 
 import { Request, Response } from 'express';
 import multer from 'multer';
-import path from 'path';
-import fs from 'fs';
+import { bucket } from '../../config/firebase';
 import { PrismaClient } from '@prisma/client';
+import { v4 as uuidv4 } from 'uuid';
 
 const prisma = new PrismaClient();
 
-export const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    const { id_usuario, nombre_completo } = req.user as { id_usuario: number, nombre_completo: string };
-    // Limpia el nombre para que no tenga espacios ni caracteres raros
-    const nombreCarpeta = nombre_completo.trim().replace(/\s+/g, '_').replace(/[^\w\-]/g, '');
-    const folderPath = path.join(process.cwd(), 'uploads', `Foto_de_perfil_${id_usuario}_${nombreCarpeta}`);
-    // Crea la carpeta si no existe
-    fs.mkdirSync(folderPath, { recursive: true });
-    cb(null, folderPath);
-  },
-  filename: (req, file, cb) => {
-    const ext = path.extname(file.originalname);
-    cb(null, `${Date.now()}-${file.fieldname}${ext}`);
-  }
-});
+const storage = multer.memoryStorage(); // 🔥 usa memoria para trabajar con buffer
 
 export const upload = multer({
   storage,
@@ -36,33 +22,40 @@ export const upload = multer({
   }
 });
 
-export const uploadProfilePhoto = async (req: Request, res: Response) => {
+export const uploadProfilePhoto = async (req: Request, res: Response): Promise<void> => {
   const { id_usuario, nombre_completo } = req.user as { id_usuario: number, nombre_completo: string };
+
   if (!req.file) {
-    res.status(400).json({ message: 'No se subió ninguna imagen.' });
-    return;
+     res.status(400).json({ message: 'No se subió ninguna imagen.' });
+     return;
   }
-  //const imagePath = `/uploads/${req.file.filename}`;
-  const nombreCarpeta = nombre_completo.trim().replace(/\s+/g, '_').replace(/[^\w\-]/g, '');
-  const folderUrl = `/uploads/Foto_de_perfil_${id_usuario}_${nombreCarpeta}`;
-  const imagePath = `${folderUrl}/${req.file.filename}`;
+
+  const fileName = `FotoPerfil_${id_usuario}_${nombre_completo.trim().replace(/\s+/g, '_')}_${uuidv4()}.png`;
+  const file = bucket.file(fileName);
+
   try {
-    await prisma.usuario.update({
-      where: { id_usuario },
-      data: { foto_perfil: imagePath },
+    await file.save(req.file.buffer, {
+      contentType: req.file.mimetype,
+      public: true, // 🔥 hacerlo público
+      metadata: {
+        firebaseStorageDownloadTokens: uuidv4()
+      }
     });
 
-    res.json({
-      message: 'Foto de perfil actualizada exitosamente.',
-      foto_perfil: imagePath
+    const publicUrl = `https://storage.googleapis.com/${bucket.name}/${file.name}`;
+
+    await prisma.usuario.update({
+      where: { id_usuario },
+      data: { foto_perfil: publicUrl }
     });
+
+     res.json({ message: 'Foto actualizada exitosamente.', foto_perfil: publicUrl });
   } catch (error) {
-    console.error('Error al guardar la foto de perfil:', error);
-    res.status(500).json({ message: 'Error al actualizar la foto de perfil.' });
+    console.error('Error al subir foto:', error);
+     res.status(500).json({ message: 'Error al subir la foto a Firebase.' });
   }
 };
 
-//eliminar foto de perfil
 export const deleteProfilePhoto = async (req: Request, res: Response): Promise<void> => {
   const { id_usuario } = req.user as { id_usuario: number };
 
@@ -77,36 +70,20 @@ export const deleteProfilePhoto = async (req: Request, res: Response): Promise<v
       return;
     }
 
-    const filePath = path.join(process.cwd(), user.foto_perfil);
+    // Extrae el nombre del archivo desde la URL
+    const fileName = user.foto_perfil.split('/').pop();
+    if (fileName) {
+      await bucket.file(fileName).delete();
+    }
 
-    // ✅ 1. Elimina la foto física si existe
-    fs.unlink(filePath, (err) => {
-      if (err) {
-        console.error('Error eliminando el archivo:', err);
-      } else {
-        console.log('✅ Foto eliminada del servidor:', filePath);
-    
-        // ✅ 2. Si la carpeta queda vacía, la eliminamos
-        const userFolder = path.dirname(filePath);
-        fs.readdir(userFolder, (err, files) => {
-          if (!err && files.length === 0) {
-            fs.rmdir(userFolder, (err) => {
-              if (err) console.error('Error eliminando carpeta vacía:', err);
-            });
-          }
-        });
-      }
-    });
-
-    // ✅ 2. Borra la referencia en la base de datos
     await prisma.usuario.update({
       where: { id_usuario },
       data: { foto_perfil: null },
     });
 
-    res.json({ message: 'Foto de perfil eliminada exitosamente.' });
+    res.json({ message: 'Foto eliminada exitosamente.' });
   } catch (error) {
-    console.error('Error al eliminar la foto de perfil:', error);
-    res.status(500).json({ message: 'Error al eliminar la foto.' });
+    console.error('Error al eliminar la foto:', error);
+    res.status(500).json({ message: 'Error al eliminar la foto de Firebase.' });
   }
 };
