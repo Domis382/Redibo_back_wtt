@@ -35,7 +35,8 @@ export const createUser = async (data: {
 export const updateGoogleProfile = async (
   email: string,
   nombre_completo: string,
-  fecha_nacimiento: string
+  fecha_nacimiento: string,
+  telefono?: string // ✅ nuevo campo opcional
 ) => {
   const existingUser = await prisma.usuario.findUnique({
     where: { email },
@@ -50,6 +51,7 @@ export const updateGoogleProfile = async (
     data: {
       nombre_completo,
       fecha_nacimiento: new Date(fecha_nacimiento),
+      telefono: telefono ? parseInt(telefono) : undefined, // ✅ lo guarda
     },
   });
 
