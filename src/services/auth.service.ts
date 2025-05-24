@@ -12,7 +12,7 @@ export const createUser = async (data: {
   email: string;
   contraseña: string;
   fecha_nacimiento: string;
-  telefono?: number | null;
+  telefono?: string | null;
 }) => {
   const salt = await bcrypt.genSalt(10);
   const hashedPassword = await bcrypt.hash(data.contraseña, salt);
@@ -51,7 +51,7 @@ export const updateGoogleProfile = async (
     data: {
       nombre_completo,
       fecha_nacimiento: new Date(fecha_nacimiento),
-      telefono: telefono ? parseInt(telefono) : undefined, // ✅ lo guarda
+      telefono: typeof telefono === "string" ? telefono : undefined, // ✅ lo guarda
     },
   });
 
@@ -123,6 +123,6 @@ export const findOrCreateGoogleUser = async (email: string, name: string) => {
 
 
 
-export const findUserByPhone = async (telefono: number) => {
+export const findUserByPhone = async (telefono: string) => {
   return prisma.usuario.findFirst({ where: { telefono } });
 };
