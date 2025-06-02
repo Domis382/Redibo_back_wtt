@@ -1,3 +1,4 @@
+//src/services/auth.service.ts
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
 
@@ -8,10 +9,10 @@ export const findUserByEmail = async (email: string) => {
 };
 
 export const createUser = async (data: {
-  nombre_completo: string;
+  nombreCompleto: string;
   email: string;
   contraseña: string;
-  fecha_nacimiento: string;
+  fechaNacimiento: string;
   telefono?: string | null;
 }) => {
   const salt = await bcrypt.genSalt(10);
@@ -19,12 +20,12 @@ export const createUser = async (data: {
 
   return prisma.usuario.create({
     data: {
-      nombre_completo: data.nombre_completo,
+      nombreCompleto: data.nombreCompleto,
       email: data.email,
       contraseña: hashedPassword,
-      fecha_nacimiento: new Date(data.fecha_nacimiento),
-      telefono: data.telefono ?? null,
-      registrado_con: "email",
+      fechaNacimiento: new Date(data.fechaNacimiento),
+      telefono: data.telefono ? String(data.telefono) : null,
+      registradoCon: "email",
       verificado: false,
       host: false,
       //driver: false,
@@ -34,23 +35,23 @@ export const createUser = async (data: {
 
 export const updateGoogleProfile = async (
   email: string,
-  nombre_completo: string,
-  fecha_nacimiento: string,
+  nombreCompleto: string,
+  fechaNacimiento: string,
   telefono?: string // ✅ nuevo campo opcional
 ) => {
   const existingUser = await prisma.usuario.findUnique({
     where: { email },
   });
 
-  if (existingUser && existingUser.registrado_con === "email") {
+  if (existingUser && existingUser.registradoCon === "email") {
     throw new Error("Este correo ya está registrado con email");
   }
 
   const updatedUser = await prisma.usuario.update({
     where: { email },
     data: {
-      nombre_completo,
-      fecha_nacimiento: new Date(fecha_nacimiento),
+      nombreCompleto,
+      fechaNacimiento: new Date(fechaNacimiento),
       telefono: typeof telefono === "string" ? telefono : undefined, // ✅ lo guarda
     },
   });
@@ -65,16 +66,15 @@ export const validatePassword = async (
   return bcrypt.compare(inputPassword, hashedPassword);
 };
 
-export const getUserById = async (id_usuario: number) => {
+export const getUserById = async (idUsuario: number) => {
   return await prisma.usuario.findUnique({
-    where: { id_usuario }, // Asegúrate que en Prisma el campo se llame id_usuario
-    select: {
-      // Evita traer la contraseña u otros campos sensibles
-      id_usuario: true,
-      nombre_completo: true,
+    where: { idUsuario }, // Asegúrate que en Prisma el campo se llame idUsuario
+    select: { // Evita traer la contraseña u otros campos sensibles
+      idUsuario: true,
+      nombreCompleto: true,
       email: true,
       telefono: true,
-      fecha_nacimiento: true,
+      fechaNacimiento: true,
     },
   });
 };
@@ -82,8 +82,8 @@ export const createUserWithGoogle = async (email: string, name: string) => {
   return prisma.usuario.create({
     data: {
       email,
-      nombre_completo: name,
-      registrado_con: "google",
+      nombreCompleto: name,
+      registradoCon: "google",
       verificado: true,
     },
   });
@@ -96,15 +96,14 @@ export const findOrCreateGoogleUser = async (email: string, name: string) => {
   if (existingUser) {
     console.log("👤 Usuario encontrado:", {
       email: existingUser.email,
-      registrado_con: existingUser.registrado_con,
+      registradoCon: existingUser.registradoCon,
     });
-    if (existingUser.registrado_con === "email") {
+    if (existingUser.registradoCon === "email") {
       console.warn("⚠️ Ya registrado manualmente, lanzando error especial");
       const error: any = new Error("Este correo ya está registrado con email.");
       error.name = "EmailAlreadyRegistered";
       throw error;
     }
-
     console.log("✅ Usuario ya registrado con Google, retornando");
     return { user: existingUser, isNew: false };
   }
@@ -113,14 +112,13 @@ export const findOrCreateGoogleUser = async (email: string, name: string) => {
   const newUser = await prisma.usuario.create({
     data: {
       email,
-      nombre_completo: name,
-      registrado_con: "google",
+      nombreCompleto: name,
+      registradoCon: "google",
       verificado: true,
     },
   });
   return { user: newUser, isNew: true };
 };
-
 
 
 export const findUserByPhone = async (telefono: string) => {

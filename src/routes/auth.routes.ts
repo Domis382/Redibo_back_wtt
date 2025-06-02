@@ -30,26 +30,14 @@ router.get(
   passport.authenticate("google", { scope: ["profile", "email"] })
 );
 
-/* router.get(
-  "/auth/google/callback",
-  passport.authenticate("google", {
-    failureRedirect: "http://34.10.219.81:3000?error=google",
-    session: true,
-  }),
-  (req, res) => {
-    // 🔥 Redirige al front para que abra el modal de completar perfil
-    res.redirect("http://34.10.219.81:3000/home?googleComplete=true");
-  }
-); */
-
 router.get(
   "/auth/google/callback",
   passport.authenticate("google", {
-    failureRedirect: "http://34.10.219.81:3000/home?error=google",
+    failureRedirect: "http://localhost:3000/home?error=google",
     session: false,
   }),
   (req, res) => {
-    const user = req.user as { id_usuario: number; email: string; nombre_completo: string };
+    const user = req.user as { idUsuario: number; email: string; nombreCompleto: string };
     const info = req.authInfo as { message?: string; token?: string; email?: string };
     
     console.log("🔁 CALLBACK GOOGLE:");
@@ -60,21 +48,21 @@ router.get(
     if (info?.message === "alreadyExists" || info?.message === "loginWithGoogle") {
       console.log("⚠️ Usuario ya registrado. Enviando login automático.");
       return res.redirect(
-        `http://34.10.219.81:3000/home?googleAutoLogin=true&token=${info.token}&email=${info.email}`
+        `http://localhost:3000/home?googleAutoLogin=true&token=${info.token}&email=${info.email}`
       );
     }
 
     // ✅ Caso: cuenta nueva, requiere completar perfil
     const token = generateToken({
-      id_usuario: user.id_usuario,
+      idUsuario: user.idUsuario,
       email: user.email,
-      nombre_completo: user.nombre_completo,
+      nombreCompleto: user.nombreCompleto,
     });
 
     console.log("🧩 Usuario nuevo, redirigiendo a completar perfil");
 
     return res.redirect(
-      `http://34.10.219.81:3000/home?googleComplete=true&token=${token}&email=${user.email}`
+      `http://localhost:3000/home?googleComplete=true&token=${token}&email=${user.email}`
     );
   }
 );
@@ -93,13 +81,13 @@ router.get("/auth/failure", (req, res) => {
 router.post("/register", validateRegister, register);
 router.post("/login", validateLogin, login);
 router.get("/me", isAuthenticated, me);
-router.get("/user-profile/:id_usuario", getUserProfile);
+router.get("/user-profile/:idUsuario", getUserProfile);
 
 //foto de perfil actualizar/eliminar
 router.post(
   "/upload-profile-photo",
   authMiddleware,
-  upload.single("foto_perfil"),
+  upload.single("fotoPerfil"),
   uploadProfilePhoto
 );
 router.delete("/delete-profile-photo", authMiddleware, deleteProfilePhoto);

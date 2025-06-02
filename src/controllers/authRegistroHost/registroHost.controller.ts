@@ -1,16 +1,22 @@
 import { Request, Response } from "express";
 import { registrarHostCompleto } from "../../services/pago.service";
-import { uploadToCloudinary } from "../../services/upload.service"; // ⬅ nuevo import
+import { uploadToCloudinary } from "../../services/upload.service";
+import { PrismaClient } from "@prisma/client";
 
-export const registrarHostCompletoController = async (req: Request, res: Response): Promise<void> => {
+const prisma = new PrismaClient();
+
+export const registrarHostCompletoController = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
   try {
-    const usuario = req.user as { id_usuario: number };
+    const usuario = req.user as { idUsuario: number };
     const {
       placa,
       soat,
       tipo,
-      numero_tarjeta,
-      fecha_expiracion,
+      numeroTarjeta,
+      fechaExpiracion,
       titular,
       detalles_metodo,
     } = req.body;
@@ -29,36 +35,50 @@ export const registrarHostCompletoController = async (req: Request, res: Respons
     }
 
     const tipoFinal =
-      tipo === "card" ? "tarjeta" : tipo === "qr" ? "qr" : tipo === "cash" ? "efectivo" : null;
+      tipo === "card"
+        ? "TARJETA_DEBITO"
+        : tipo === "QR"
+        ? "QR"
+        : tipo === "cash"
+        ? "EFECTIVO"
+        : null;
 
     if (!tipoFinal) {
       res.status(400).json({ message: "Tipo de método de pago inválido" });
       return;
     }
 
-    // ⬇ Subida de imágenes del vehículo a Cloudinary
+    // Validar que exista ubicación por defecto (idUbicacion = 1)
+    const ubicacion = await prisma.ubicacion.findUnique({
+      where: { idUbicacion: 1 },
+    });
+    if (!ubicacion) {
+      res.status(400).json({ message: "Ubicación por defecto no encontrada" });
+      return;
+    }
+
+    // Subir imágenes del vehículo
     const imagenesSubidas = await Promise.all(
       imagenes.map((file) => uploadToCloudinary(file))
     );
 
-    // ⬇ Subida de imagen QR si existe
-    let imagen_qr: string | undefined = undefined;
+    // Subir imagen QR si se proporciona
+    let imagenQr: string | undefined = undefined;
     if (qrFile) {
-      imagen_qr = await uploadToCloudinary(qrFile);
+      imagenQr = await uploadToCloudinary(qrFile);
     }
 
-    // ⬇ Registrar en BD usando servicio existente
     await registrarHostCompleto({
-      id_usuario: usuario.id_usuario,
+      idPropietario: usuario.idUsuario,
       placa,
       soat,
-      imagenes: imagenesSubidas, // ahora son URLs, no filenames
+      imagenes: imagenesSubidas,
       tipo: tipoFinal,
-      numero_tarjeta,
-      fecha_expiracion,
+      numeroTarjeta,
+      fechaExpiracion,
       titular,
-      imagen_qr,
-      detalles_metodo_pago: detalles_metodo,
+      imagenQr,
+      detallesMetodoPago: detalles_metodo,
     });
 
     res.status(201).json({ success: true, message: "Registro host completo" });
@@ -67,3 +87,4 @@ export const registrarHostCompletoController = async (req: Request, res: Respons
     res.status(500).json({ message: "Error al registrar host" });
   }
 };
+

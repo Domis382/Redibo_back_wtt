@@ -12,15 +12,14 @@ passport.use(
       clientID: process.env.GOOGLE_CLIENT_ID || "",
       clientSecret: process.env.GOOGLE_CLIENT_SECRET || "",
       callbackURL:
-        "https://redibo-back-wtt.vercel.app/api/auth/google/callback",
-    },
-    async (_accessToken, _refreshToken, profile, done) => {
-      console.log("🔵 Perfil de Google:", profile);
-      console.log(
-        "🔵 Iniciando autenticación Google - Perfil recibido:",
-        JSON.stringify(profile, null, 2)
-      ); // 👈 Log 1
-
+      "http://localhost:3001/api/auth/google/callback",
+  },
+  async (_accessToken, _refreshToken, profile, done) => {
+    console.log("🔵 Perfil de Google:", profile);
+    console.log(
+      "🔵 Iniciando autenticación Google - Perfil recibido:",
+      JSON.stringify(profile, null, 2)
+    ); // 👈 Log 1
       try {
         const email = profile.emails?.[0].value;
         const name = profile.displayName;
@@ -38,12 +37,12 @@ passport.use(
         const { user, isNew } = await findOrCreateGoogleUser(email, name);
 
         const token = generateToken({
-          id_usuario: user.id_usuario,
+          idUsuario: user.idUsuario,
           email: user.email,
-          nombre_completo: user.nombre_completo,
+          nombreCompleto: user.nombreCompleto,
         });
 
-        if (user.registrado_con === "email") {
+        if (user.registradoCon === "email") {
           console.warn("⚠️ Correo ya registrado manualmente:", email);
 
           console.log("✅ Usuario autenticado y token generado");

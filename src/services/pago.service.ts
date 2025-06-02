@@ -1,40 +1,57 @@
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient, Prisma } from "@prisma/client";
 const prisma = new PrismaClient();
 
 export const registrarHostCompleto = async (data: {
-  id_usuario: number;
+  idPropietario: number;
   placa: string;
   soat: string;
   imagenes: string[];
-  tipo: "tarjeta" | "qr" | "efectivo";
-  numero_tarjeta?: string;
-  fecha_expiracion?: string;
+  tipo: "TARJETA_DEBITO" | "QR" | "EFECTIVO";
+  numeroTarjeta?: string;
+  fechaExpiracion?: string;
   titular?: string;
-  imagen_qr?: string;
-  detalles_metodo_pago?: string;
+  imagenQr?: string;
+  detallesMetodoPago?: string;
 }) => {
-  const { id_usuario, ...resto } = data;
+  const { idPropietario, ...resto } = data;
 
   return await prisma.$transaction([
-    prisma.vehiculo.create({
+    prisma.auto.create({
       data: {
         placa: resto.placa,
         soat: resto.soat,
-        imagenes: resto.imagenes,
-        usuario: { connect: { id_usuario } },
+        imagenes: {
+          create: resto.imagenes.map((img) => ({ direccionImagen: img })),
+        },
+        propietario: { connect: { idUsuario: idPropietario } },
+        ubicacion: { connect: { idUbicacion: 1 } }, // Asegúrate de que existe
+        marca: "Por definir",
+        modelo: "Por definir",
+        tipo: "Por definir",
+        año: 2024,
+        color: "Por definir",
+        precioRentaDiario: new Prisma.Decimal(0),
+        montoGarantia: new Prisma.Decimal(0),
+        transmision: "MANUAL",
+        combustible: "GASOLINA",
+        capacidadMaletero: 0,
+        asientos: 5,
+        estado: "ACTIVO",
       },
     }),
     prisma.usuario.update({
-      where: { id_usuario },
+      where: { idUsuario: idPropietario },
       data: {
-        metodo_pago_tipo: resto.tipo,
-        numero_tarjeta: resto.numero_tarjeta,
-        fecha_expiracion: resto.fecha_expiracion,
+        metodoPago: resto.tipo,
+        numeroTarjeta: resto.numeroTarjeta,
+        fechaExpiracion: resto.fechaExpiracion,
         titular: resto.titular,
-        imagen_qr: resto.imagen_qr,
-        detalles_metodo_pago: resto.detalles_metodo_pago,
+        imagenQr: resto.imagenQr,
+        detallesMetodoPago: resto.detallesMetodoPago,
         host: true,
       },
     }),
   ]);
 };
+
+
