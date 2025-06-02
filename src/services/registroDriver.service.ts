@@ -38,8 +38,8 @@ export const registrarDriverCompleto = async (data: {
   const telefonoFinal = usuario?.telefono ? String(usuario.telefono) : telefono;
 
   return await prisma.$transaction(async (tx) => {
-    // 1. Crear al driver
-    await tx.driver.create({
+    // 1. Crear al driver y obtener su ID real
+    const driver = await tx.driver.create({
       data: {
         idUsuario,
         sexo,
@@ -67,17 +67,25 @@ export const registrarDriverCompleto = async (data: {
       data: { driverBool: true }
     });
 
-    // 4. Registrar relaciones en UsuarioDriver con fecha
-    for (const renterId of rentersIds) {
-      await tx.usuarioDriver.create({
-        data: {
-          idUsuario: renterId,
-          idDriver: idUsuario, // porque el driver usa su mismo idUsuario
-          fechaAsignacion: new Date()
-        }
-      });
+    // 4. Validar que todos los renterIds existen
+    const renters = await tx.usuario.findMany({
+      where: {
+        idUsuario: { in: rentersIds },
+      }
+    });
+
+    if (renters.length !== rentersIds.length) {
+      throw new Error("Uno o más renters no existen en la base de datos.");
     }
+
+    // 5. Registrar relaciones en UsuarioDriver
+    await tx.usuarioDriver.createMany({
+      data: rentersIds.map(renterId => ({
+        idUsuario: renterId,
+        idDriver: driver.idDriver,
+        fechaAsignacion: new Date()
+      })),
+      skipDuplicates: true
+    });
   });
 };
-
-

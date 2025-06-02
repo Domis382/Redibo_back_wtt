@@ -5,6 +5,7 @@ const prisma = new PrismaClient();
 export const obtenerRentersDeDriver = async (idUsuario: number) => {
   const driver = await prisma.driver.findUnique({
     where: { idUsuario },
+    select: { idDriver: true }
   });
 
   if (!driver) {
@@ -12,9 +13,9 @@ export const obtenerRentersDeDriver = async (idUsuario: number) => {
   }
 
   const relaciones = await prisma.usuarioDriver.findMany({
-    where: { idDriver: idUsuario },
+    where: { idDriver: driver.idDriver },
     include: {
-      usuario: true,
+      usuario: true, 
     },
   });
 
