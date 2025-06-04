@@ -33,6 +33,7 @@ import { NotificacionService } from "./services/notificaciones/notificacion.serv
 import { NotificacionController } from "./controllers/notificaciones/notificacion.controller";
 import { SSEController } from "./controllers/notificaciones/sse.controller";
 import { createNotificacionRoutes } from "./routes/notificaciones/notificacion.routes";
+import { FRONTEND_URL } from "./config/constants";
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -66,7 +67,7 @@ async function ensureDefaultUbicacion() {
 
 // ✅ CORS robusto
 app.use((req: Request, res: Response, next: NextFunction): void => {
-  res.header("Access-Control-Allow-Origin", "http://34.57.17.201:3000");
+  res.header("Access-Control-Allow-Origin", "${FRONTEND_URL}");
   res.header("Access-Control-Allow-Credentials", "true");
   res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
   res.header("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE, OPTIONS");

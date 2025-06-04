@@ -3,6 +3,7 @@ import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 import { PrismaClient } from "@prisma/client";
 import { findOrCreateGoogleUser } from "../services/auth/auth.service";
 import { generateToken } from "../utils/auth/generateToken";
+import { GOOGLE_CALLBACK_URL } from "./constants"; // Asegúrate de tener esta constante definida
 
 const prisma = new PrismaClient();
 
@@ -11,8 +12,7 @@ passport.use(
     {
       clientID: process.env.GOOGLE_CLIENT_ID || "",
       clientSecret: process.env.GOOGLE_CLIENT_SECRET || "",
-      callbackURL:
-      "https://redibo-back-2rbmp7p8e-domis382s-projects.vercel.app/api/auth/google/callback",
+      callbackURL: GOOGLE_CALLBACK_URL,
   },
   async (_accessToken, _refreshToken, profile, done) => {
     console.log("🔵 Perfil de Google:", profile);
