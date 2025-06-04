@@ -1,6 +1,8 @@
 import { Response, NextFunction } from "express";
 import { PrismaClient } from "@prisma/client";
-import { AuthenticatedRequest } from "../../../middlewares/auth/authDriverMiddleware"; // 👈 Asegúrate de usar la ruta correcta
+// Ajusta la importación según el nombre correcto exportado desde authDriverMiddleware
+import type { Request } from "express";
+type AuthenticatedRequest = Request & { user?: { idUsuario: number } };
 
 const prisma = new PrismaClient();
 
