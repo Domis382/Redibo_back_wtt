@@ -19,17 +19,16 @@ model Usuario {
   verificado         Boolean       @default(false)
   host               Boolean       @default(false)
   driverBool         Boolean       @default(false)
-  fotoPerfil         String? @db.VarChar(255) // NUEVO: para guardar la ruta de la foto
+  fotoPerfil         String? @db.VarChar(255)
   codigoVerificacion String?
   //Autenticacion en 2 pasos
   verificacionDosPasos Boolean @default(false)
   codigo2FA           String?   @db.VarChar(6)
   codigo2FAExpira     DateTime?
-
+  
   bloqueado          Boolean   @default(false)
   fechaBloqueado     DateTime?
   intentosFallidos   Int       @default(0)
-  //failedCodeAttempts Int       @default(0)
   direccion          String?
   esAdmin            Boolean            @default(false)
 
@@ -54,7 +53,10 @@ model Usuario {
   driversAsignados       UsuarioDriver[]
 
   assignedToDriver Int?
-  driverReferente  Driver? @relation("DriverToRenters", fields: [assignedToDriver], references: [idUsuario])
+  driverReferente  Driver? @relation("DriverToRenters", fields: [assignedToDriver], references: [idDriver])
+
+  // Rentas como cliente
+  rentas              Renta[]
 
   // Método de pago directo
   metodoPago            MetodoPago?
@@ -66,7 +68,6 @@ model Usuario {
 
   @@map("usuarios")
 }
-
 
 model Verificaciones {
   idCodigo    Int              @id @default(autoincrement())
@@ -111,7 +112,7 @@ model Driver {
   createdAt         DateTime           @default(now())
   updatedAt         DateTime           @updatedAt
   
-  renters           Usuario[] @relation("DriverToRenters") // lista de renters asignados
+  renters           Usuario[] @relation("DriverToRenters")
 
   @@map("drivers")
 }
@@ -133,7 +134,7 @@ model UsuarioDriver {
 }
 
 model Notificacion {
-  idNotificacion            Int                @id @default(autoincrement())
+  idNotificacion  String                @id @default(uuid())
   idUsuario     Int
   titulo        String                @db.VarChar(100)
   mensaje       String
@@ -144,7 +145,7 @@ model Notificacion {
   creadoEn      DateTime              @default(now())
   actualizadoEn DateTime              @updatedAt
   haSidoBorrada Boolean               @default(false)
-  tipo          TipoDeNotificacion
+  tipo          String
   prioridad     PrioridadNotificacion @default(MEDIA)
   usuario       Usuario               @relation(fields: [idUsuario], references: [idUsuario], onDelete: Cascade)
 
@@ -153,6 +154,59 @@ model Notificacion {
   @@index([creadoEn])
   @@index([leido, idUsuario])
   @@index([idUsuario, haSidoBorrada])
+}
+
+model Renta {
+  idRenta            String      @id @default(uuid())
+  fechaInicio        DateTime
+  fechaFin           DateTime
+  montoTotal         Decimal     @db.Decimal(10, 2)
+  kilometrajeInicial Int?
+  kilometrajeFinal   Int?
+  estatus            EstadoRenta @default(EN_CURSO)
+  fechaAprobacion    DateTime
+  idReserva          Int         @unique  // Cambiado de String a Int
+  reserva            Reserva     @relation(fields: [idReserva], references: [idReserva], onDelete: Cascade)
+  clienteId          Int         
+  cliente            Usuario     @relation(fields: [clienteId], references: [idUsuario], onDelete: Cascade)
+  idAuto             Int         
+  auto               Auto        @relation(fields: [idAuto], references: [idAuto], onDelete: Cascade)
+  
+  // Relación con calificación
+  calificacion       Calificacion?
+
+  @@index([idRenta])
+  @@index([idReserva])
+}
+
+model Comentario {
+  idComentario      Int                @id @default(autoincrement())
+  idAuto            Int
+  auto              Auto               @relation(fields: [idAuto], references: [idAuto])
+  idUsuario         Int                
+  usuario           Usuario            @relation(fields: [idUsuario], references: [idUsuario])
+  contenido         String?
+  calificacion      Int                @db.SmallInt
+  fechaCreacion     DateTime           @default(now())
+  idReserva         Int?               @unique
+  reserva           Reserva?           @relation(fields: [idReserva], references: [idReserva])
+  
+  // Relación con calificación (removida porque ya no es necesaria)
+  
+  @@map("comentarios")
+}
+
+model Calificacion {
+  idCalificacion String   @id @default(uuid())
+  puntuacion    Int      @db.SmallInt
+  idRenta       String   @unique 
+  renta         Renta    @relation(fields: [idRenta], references: [idRenta], onDelete: Cascade)
+
+  fechaCreacion DateTime @default(now())  
+  
+  // Removido idComentario ya que causaba conflicto
+  
+  @@index([idRenta])
 }
 
 model Ubicacion {
@@ -168,10 +222,8 @@ model Ubicacion {
 
 model Auto {
   idAuto      Int      @id @default(autoincrement())
-  //idUsuario  Int
   idPropietario     Int
   idUbicacion Int
-  //usuario           Usuario  @relation(fields: [idUsuario], references: [idUsuario])
   propietario       Usuario            @relation(fields: [idPropietario], references: [idUsuario])
   ubicacion         Ubicacion          @relation(fields: [idUbicacion], references: [idUbicacion])
 
@@ -186,6 +238,7 @@ model Auto {
   totalComentarios  Int                @default(0)
   reservas          Reserva[]
   disponibilidad    Disponibilidad[]
+  rentas            Renta[]            // Agregada relación con Renta
 
   tipo        String             
   año         Int
@@ -195,8 +248,7 @@ model Auto {
   estado            EstadoAuto         @default(ACTIVO) 
   fechaAdquisicion  DateTime           @default(now())
   historialMantenimiento HistorialMantenimiento[]
-  //imagen    String[]
-  imagenes    Imagen[] // aquí guardarías los nombres de archivos o rutas
+  imagenes    Imagen[]
   asientos          Int                @default(5)
   capacidadMaletero Int                
   transmision       Transmision       
@@ -248,6 +300,9 @@ model Reserva {
   comentario        Comentario?       
   estaPagada        Boolean            @default(false) 
   calificacionUsuario CalificacionUsuario?
+  
+  // Relación con Renta
+  renta             Renta?
 
   @@map("reservas")
 }
@@ -293,21 +348,6 @@ model HistorialMantenimiento {
   @@map("historial_mantenimiento")
 }
 
-model Comentario {
-  idComentario      Int                @id @default(autoincrement())
-  idAuto            Int
-  auto              Auto               @relation(fields: [idAuto], references: [idAuto])
-  idUsuario         Int                
-  usuario           Usuario            @relation(fields: [idUsuario], references: [idUsuario])
-  contenido         String?
-  calificacion      Int                @db.SmallInt
-  fechaCreacion     DateTime           @default(now())
-  idReserva         Int?               @unique
-  reserva           Reserva?           @relation(fields: [idReserva], references: [idReserva])
-  
-  @@map("comentarios")
-}
-
 model CalificacionUsuario {
   idCalificacion    Int                @id @default(autoincrement())
   idCalificador     Int                
@@ -329,6 +369,12 @@ model CalificacionUsuario {
 enum TipoCalificacionUsuario {
   ARRENDADOR    
   ARRENDATARIO  
+}
+
+enum EstadoRenta {
+  EN_CURSO
+  FINALIZADA
+  CANCELADA
 }
 
 enum EstadoReserva {
@@ -400,26 +446,12 @@ enum PrioridadNotificacion {
   ALTA
 }
 
-// Enum para registradoCon
 enum RegistradoCon {
   email
   google
 }
 
-// Enum para tipo en verificaciones
 enum TipoVerificacion {
   recuperacion
   verificacion
-}
-
-enum TipoDeNotificacion {
-  RESERVA_SOLICITADA 
-  RESERVA_APROBADA 
-  RESERVA_RECHAZADA
-  DEPOSITO_CONFIRMADO
-  DEPOSITO_RECIBIDO
-  RESERVA_CANCELADA 
-  ALQUILER_FINALIZADO 
-  RESERVA_MODIFICADA
-  VEHICULO_CALIFICADO
 }

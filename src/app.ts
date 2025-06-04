@@ -9,22 +9,30 @@ import passport from "passport";
 
 import path from "path";
 import { PrismaClient } from "@prisma/client";
+import { v4 as uuidv4 } from "uuid";
 
-// Rutas
-import passwordRoutes from "../src/routes/password.routes";
-import authRoutes from "../src/routes/auth.routes";
-import authRegistroHostRoutes from "../src/routes/registroHost.routes";
-import authRegistroDriverRoutes from "./routes/registroDriver.routes";
-import usuarioRoutes from "./routes/usuario.routes";
-import visualizarDriverRoutes from "./routes/visualizarDriver.routes";
-import listaDriversRoutes from './routes/listaDrivers.routes';
+// Configuración de Google Auth
+import "./config/googleAuth";
 
-// Google Auth
-import "../src/config/googleAuth";
+// Rutas de autenticación
+import passwordRoutes from "./routes/auth/password.routes";
+import authRoutes from "./routes/auth/auth.routes";
+import authRegistroHostRoutes from "./routes/auth/registroHost.routes";
+import authRegistroDriverRoutes from "./routes/auth/registroDriver.routes";
+import usuarioRoutes from "./routes/auth/usuario.routes";
+import visualizarDriverRoutes from "./routes/auth/visualizarDriver.routes";
+import listaDriversRoutes from "./routes/auth/listaDrivers.routes";
+import visualizarRentersRoutes from "./routes/auth/visualizarRenters.routes";
 
-//verificacion en 2 pasos
-import twofaRoutes from './routes/twofa.routes';
+// Verificación en 2 pasos
+import twofaRoutes from "./routes/auth/twofa.routes";
 
+// Servicios y controladores de notificaciones
+import { SSEService } from "./services/notificaciones/sse.service";
+import { NotificacionService } from "./services/notificaciones/notificacion.service";
+import { NotificacionController } from "./controllers/notificaciones/notificacion.controller";
+import { SSEController } from "./controllers/notificaciones/sse.controller";
+import { createNotificacionRoutes } from "./routes/notificaciones/notificacion.routes";
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -32,22 +40,27 @@ const prisma = new PrismaClient();
 
 // ✅ Crear ubicación por defecto al iniciar el servidor
 async function ensureDefaultUbicacion() {
-  const existing = await prisma.ubicacion.findUnique({ where: { idUbicacion: 1 } });
+  try {
+    const existing = await prisma.ubicacion.findUnique({ where: { idUbicacion: 1 } });
 
-  if (!existing) {
-    await prisma.ubicacion.create({
-      data: {
-        idUbicacion: 1,
-        nombre: "Ubicación por defecto",
-        descripcion: "Generada automáticamente",
-        latitud: -17.3935,
-        longitud: -66.1570,
-        esActiva: true,
-      },
-    });
-    console.log("✅ Ubicación por defecto creada");
-  } else {
-    console.log("ℹ️ Ubicación por defecto ya existe");
+    if (!existing) {
+      await prisma.ubicacion.create({
+        data: {
+          idUbicacion: 1,
+          nombre: "Ubicación por defecto",
+          descripcion: "Generada automáticamente",
+          latitud: -17.3935,
+          longitud: -66.1570,
+          esActiva: true,
+        },
+      });
+      console.log("✅ Ubicación por defecto creada");
+    } else {
+      console.log("ℹ️ Ubicación por defecto ya existe");
+    }
+  } catch (error) {
+    console.error("❌ Error al verificar/crear ubicación por defecto:", error);
+    throw error;
   }
 }
 
@@ -66,11 +79,27 @@ app.use((req: Request, res: Response, next: NextFunction): void => {
   next();
 });
 
-// Middlewares
+// Middlewares básicos
 app.use(helmet({ crossOriginResourcePolicy: false }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// Middleware para keep-alive (para notificaciones SSE)
+app.use((req, res, next) => {
+  req.socket.setKeepAlive(true);
+  req.socket.setTimeout(0);
+  next();
+});
+
+// Middleware para SSE (evitar compresión)
+app.use((req, res, next) => {
+  if (req.path.includes("/api/notificaciones/sse")) {
+    res.set("Content-Encoding", "identity");
+  }
+  next();
+});
+
+// Configuración de archivos estáticos
 app.use(
   "/uploads",
   (req, res, next) => {
@@ -81,54 +110,69 @@ app.use(
   express.static(path.join(__dirname, "..", "uploads"))
 );
 
+// Configuración de sesiones
 app.use(
   session({
-    secret: "mi_clave_secreta_segura",
+    secret: process.env.SESSION_SECRET || "mi_clave_secreta_segura",
     resave: false,
     saveUninitialized: false,
     cookie: {
-      secure: false, // en producción: true si usas HTTPS
-      maxAge: 24 * 60 * 60 * 1000,
+      secure: process.env.NODE_ENV === "production",
+      maxAge: 24 * 60 * 60 * 1000, // 24 horas
     },
   })
 );
 
+// Configuración de Passport
 app.use(passport.initialize());
 app.use(passport.session());
-app.use('/uploads', express.static('uploads'));
 
-// Rutas
+// Configuración de servicios y controladores para notificaciones
+const sseService = SSEService.getInstance();
+const notificacionService = new NotificacionService();
+const notificacionController = new NotificacionController(notificacionService);
+const sseController = new SSEController(sseService);
+
+// Configurar ping periódico para el SSE
+setInterval(() => {
+  sseService.enviarPing();
+}, 30000); // 30 segundos
+
+// Rutas de la aplicación
 app.use("/api", authRoutes);
 app.use("/api", passwordRoutes);
 app.use("/api", authRegistroHostRoutes);
 app.use("/api", authRegistroDriverRoutes);
 app.use("/api", usuarioRoutes);
 app.use("/api", visualizarDriverRoutes);
+app.use("/api", visualizarRentersRoutes);
 app.use("/api", listaDriversRoutes);
+app.use("/api", twofaRoutes);
 
-//verificacion en 2 pasos
-app.use('/api/', twofaRoutes);
+// Rutas de notificaciones
+app.use("/api/notificaciones", createNotificacionRoutes());
 
+// Endpoint SSE para notificaciones
+app.get("/api/notificaciones/sse/:usuarioId", (req, res) => {
+  sseController.conectar(req, res);
+});
 
+// Rutas básicas
 app.get("/", (req, res) => {
   res.send("¡Hola desde la página principal!");
 });
 
 // Health check
 app.get("/health", (req, res) => {
-  res.status(200).json({ status: "ok" });
+  res.status(200).json({ status: "ok", timestamp: new Date().toISOString() });
 });
 
-// Inicializar servidor solo después de crear la ubicación por defecto
-ensureDefaultUbicacion()
-  .catch((err) => {
-    console.error("❌ Error al crear ubicación por defecto:", err);
+app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
+  console.error("❌ Error no manejado:", err);
+  res.status(500).json({
+    error: "Error interno del servidor",
+    message: process.env.NODE_ENV === "development" ? err.message : "Algo salió mal"
   });
+});
 
 export default app;
-
-
-// Visualizar renters
-import visualizarRentersRoutes from "./routes/visualizarRenters.routes"
-
-app.use("/api", visualizarRentersRoutes);
