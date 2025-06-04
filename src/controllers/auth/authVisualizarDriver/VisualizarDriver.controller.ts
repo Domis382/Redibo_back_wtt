@@ -1,26 +1,23 @@
 import { Response, NextFunction } from "express";
 import { PrismaClient } from "@prisma/client";
+import { RequestHandler } from "express";
 // Ajusta la importación según el nombre correcto exportado desde authDriverMiddleware
 import type { Request } from "express";
 type AuthenticatedRequest = Request & { user?: { idUsuario: number } };
 
 const prisma = new PrismaClient();
 
-export const getDriverProfile = async (
-  req: AuthenticatedRequest,
-  res: Response,
-  next: NextFunction
-): Promise<void> => {
-  const idUsuario = req.user?.idUsuario;
+export const getDriverProfile: RequestHandler = async (req, res, next) => {
+  const user = (req as any).user; // 👈 si necesitas el tipo exacto, puedes usar un cast
 
-  if (!idUsuario) {
-    res.status(401).json({ message: "No autorizado: token inválido o ausente" });
+  if (!user?.idUsuario) {
+    res.status(401).json({ message: "No autorizado: token inválido" });
     return;
   }
 
   try {
     const driver = await prisma.driver.findUnique({
-      where: { idUsuario },
+      where: { idUsuario: user.idUsuario },
       include: { usuario: true },
     });
 
