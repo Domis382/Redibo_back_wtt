@@ -9,7 +9,7 @@ passport.use(
     {
       clientID: process.env.GOOGLE_CLIENT_ID!,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
-      callbackURL: "https://redibo-back-wtt.vercel.appapi/auth/google/callback",
+      callbackURL: "https://redibo-back-2rbmp7p8e-domis382s-projects.vercel.appapi/auth/google/callback",
     },
     async (accessToken, refreshToken, profile, done) => {
       console.log("🔵 Iniciando autenticación Google - Perfil recibido:", JSON.stringify(profile, null, 2)); // 👈 Log 1

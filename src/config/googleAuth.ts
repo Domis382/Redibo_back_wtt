@@ -12,7 +12,7 @@ passport.use(
       clientID: process.env.GOOGLE_CLIENT_ID || "",
       clientSecret: process.env.GOOGLE_CLIENT_SECRET || "",
       callbackURL:
-      "https://redibo-back-wtt.vercel.app/api/auth/google/callback",
+      "https://redibo-back-2rbmp7p8e-domis382s-projects.vercel.app/api/auth/google/callback",
   },
   async (_accessToken, _refreshToken, profile, done) => {
     console.log("🔵 Perfil de Google:", profile);
@@ -47,7 +47,7 @@ passport.use(
 
           console.log("✅ Usuario autenticado y token generado");
 
-          // ✅ Devolver token junto con usuario
+          // ✅ Devolver token junto con usuario a
           return done(null, false, {
             message: "alreadyExists",
             token,
