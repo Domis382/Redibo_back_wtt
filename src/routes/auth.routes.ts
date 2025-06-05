@@ -10,7 +10,7 @@ import { me } from "../controllers/auth.controller";
 import { isAuthenticated } from "../middlewares/isAuthenticated";
 import { deleteIncompleteUserController } from "../controllers/auth.controller";
 
-//foto de perfil eliminar/actualizar
+//foto de perfil eliminar/actualizar dsadsadsa
 import {deleteProfilePhoto,uploadProfilePhoto,upload,} from "../controllers/authPerfilUsuarioRenter/fotoPerfil.controller";
 import { authMiddleware } from "../middlewares/authMiddleware";
 
