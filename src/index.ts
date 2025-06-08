@@ -1,12 +1,10 @@
-/* import express, { Request, Response, NextFunction } from "express";
+//src/index.ts
+import express, { Request, Response, NextFunction } from "express";
 import cors from "cors";
 import helmet from "helmet";
 import dotenv from "dotenv";
-dotenv.config();
-
 import session from "express-session";
 import passport from "passport";
-
 import path from "path";
 import { PrismaClient } from "@prisma/client";
 import { v4 as uuidv4 } from "uuid";
@@ -40,6 +38,8 @@ import { createNotificacionRoutes } from "./routes/notificaciones/notificacion.r
 //import mapaRoutes from "../src/routes/speedcode/filtroMapaPrecioRoutes";
 import mapaRoutes from "./routes/speedcode/filtroMapaPrecioRoutes";
 
+import { FRONTEND_URL } from "./config/constants";
+
 // Cargar variables de entorno
 dotenv.config();
 
@@ -50,22 +50,22 @@ const prisma = new PrismaClient();
 // ✅ Crear ubicación por defecto al iniciar el servidor
 async function ensureDefaultUbicacion() {
   try {
-  const existing = await prisma.ubicacion.findUnique({ where: { idUbicacion: 1 } });
+    const existing = await prisma.ubicacion.findUnique({ where: { idUbicacion: 1 } });
 
-  if (!existing) {
-    await prisma.ubicacion.create({
-      data: {
-        idUbicacion: 1,
-        nombre: "Ubicación por defecto",
-        descripcion: "Generada automáticamente",
-        latitud: -17.3935,
-        longitud: -66.1570,
-        esActiva: true,
-      },
-    });
-    console.log("✅ Ubicación por defecto creada");
-  } else {
-    console.log("ℹ️ Ubicación por defecto ya existe");
+    if (!existing) {
+      await prisma.ubicacion.create({
+        data: {
+          idUbicacion: 1,
+          nombre: "Ubicación por defecto",
+          descripcion: "Generada automáticamente",
+          latitud: -17.3935,
+          longitud: -66.1570,
+          esActiva: true,
+        },
+      });
+      console.log("✅ Ubicación por defecto creada");
+    } else {
+      console.log("ℹ️ Ubicación por defecto ya existe");
     }
   } catch (error) {
     console.error("❌ Error al verificar/crear ubicación por defecto:", error);
@@ -75,7 +75,7 @@ async function ensureDefaultUbicacion() {
 
 // ✅ CORS robusto
 app.use((req: Request, res: Response, next: NextFunction): void => {
-  res.header("Access-Control-Allow-Origin", "http://34.72.237.89:3000");
+  res.header("Access-Control-Allow-Origin", FRONTEND_URL);
   res.header("Access-Control-Allow-Credentials", "true");
   res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
   res.header("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE, OPTIONS");
@@ -182,6 +182,7 @@ app.get("/", (req, res) => {
 app.get("/health", (req, res) => {
   res.status(200).json({ status: "ok", timestamp: new Date().toISOString() });
 });
+
 // Manejo de errores global
 app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
   console.error("Error no manejado:", err);
@@ -195,17 +196,38 @@ app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
 
 // Manejo de cierre del servidor
 process.on("SIGTERM", () => {
-  console.log("🛑 Cerrando servidor...");
-  sseService.cleanup?.();
+  console.log("Cerrando servidor...");
+  sseService.cleanup();
   prisma.$disconnect();
   process.exit(0);
 });
 
 process.on("SIGINT", () => {
-  console.log("🛑 Cerrando servidor por SIGINT...");
-  sseService.cleanup?.();
+  console.log("Cerrando servidor por SIGINT...");
+  sseService.cleanup();
   prisma.$disconnect();
   process.exit(0);
 });
 
-export default app; */
+// Inicializar servidor
+async function startServer() {
+  try {
+    await ensureDefaultUbicacion();
+
+    app.listen(PORT, () => {
+      console.log(`🚀 Server running on port ${PORT}`);
+      console.log(`🌐 Environment: ${process.env.NODE_ENV || "development"}`);
+      console.log(`📡 Health check available at: http://localhost:${PORT}/health`);
+    });
+  } catch (error) {
+    console.error("❌ Error al iniciar el servidor:", error);
+    process.exit(1);
+  }
+}
+
+// Solo iniciar si este archivo es ejecutado directamente
+if (require.main === module) {
+  startServer();
+}
+
+export default app;

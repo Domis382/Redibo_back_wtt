@@ -23,7 +23,7 @@
   "license": "ISC",
   "packageManager": "pnpm@10.7.1",
   "dependencies": {
-    "@prisma/client": "^6.8.2",
+    "@prisma/client": "^6.9.0",
     "@sendgrid/mail": "^8.1.5",
     "@types/uuid": "^10.0.0",
     "bcrypt": "^5.1.1",
