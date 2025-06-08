@@ -5,6 +5,7 @@ import { findOrCreateGoogleUser } from "../services/auth/auth.service";
 import { generateToken } from "../utils/auth/generateToken";
 import { GOOGLE_CALLBACK_URL } from "./constants";
 
+
 const prisma = new PrismaClient();
 
 passport.use(

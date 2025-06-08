@@ -18,6 +18,8 @@ import { authMiddleware } from "../../middlewares/auth/authMiddleware";
 import { updateUserField } from "../../controllers/auth/auth.controller"; // 👈 IMPORTA
 import { generateToken } from "../../utils/auth/generateToken"; // Asegúrate de tener esto arriba
 
+import { FRONTEND_URL } from "../../config/constants";
+
 const router = Router();
 
 router.post("/google/complete-profile", updateGoogleProfile);
@@ -33,7 +35,7 @@ router.get(
 router.get(
   "/auth/google/callback",
   passport.authenticate("google", {
-    failureRedirect: "http://localhost:3000/home?error=google",
+    failureRedirect: `${FRONTEND_URL}/home?error=google`,
     session: false,
   }),
   (req, res) => {
@@ -48,7 +50,7 @@ router.get(
     if (info?.message === "alreadyExists" || info?.message === "loginWithGoogle") {
       console.log("⚠️ Usuario ya registrado. Enviando login automático.");
       return res.redirect(
-        `http://localhost:3000/home?googleAutoLogin=true&token=${info.token}&email=${info.email}`
+        `${FRONTEND_URL}/home?googleAutoLogin=true&token=${info.token}&email=${info.email}`
       );
     }
 
@@ -62,7 +64,7 @@ router.get(
     console.log("🧩 Usuario nuevo, redirigiendo a completar perfil");
 
     return res.redirect(
-      `http://localhost:3000/home?googleComplete=true&token=${token}&email=${user.email}`
+      `${FRONTEND_URL}/home?googleComplete=true&token=${token}&email=${user.email}`
     );
   }
 );
