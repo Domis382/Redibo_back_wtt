@@ -1,4 +1,4 @@
-import { Request, Response } from 'express';
+/* import { Request, Response } from 'express';
 import { NotificacionService } from '../../services/notificaciones/notificacion.service';
 import { PrioridadNotificacion } from '@prisma/client';
 import { RequestUtils } from '../../utils/notificaciones/request.noti.utils';
@@ -160,4 +160,4 @@ export class NotificacionController {
       });
     }
   }
-}
+} */

@@ -1,4 +1,4 @@
-//src/services/notificaciones/notificacion.service.ts
+/* //src/services/notificaciones/notificacion.service.ts
 import prisma from '../../config/database';
 import { NotificacionDTO, NotificacionFiltro } from '../../types/notificaciones/notificacion.types';
 import { PrioridadNotificacion } from '@prisma/client';
@@ -614,4 +614,4 @@ export class NotificationManager {
   registrarTemplate(tipo: string, template: (data: any) => TemplateNotificacion) {
     this.getAdapter().registrarNuevoTipo(tipo, template);
   }
-}
+} */
