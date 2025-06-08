@@ -30,8 +30,8 @@ import twofaRoutes from "./routes/auth/twofa.routes";
 
 // Servicios y controladores de notificaciones
 import { SSEService } from "./services/notificaciones/sse.service";
-import { NotificacionService } from "./services/notificaciones/notificacion.service";
-import { NotificacionController } from "./controllers/notificaciones/notificacion.controller";
+/* import { NotificacionService } from "./services/notificaciones/notificacion.service";
+import { NotificacionController } from "./controllers/notificaciones/notificacion.controller"; */
 import { SSEController } from "./controllers/notificaciones/sse.controller";
 import { createNotificacionRoutes } from "./routes/notificaciones/notificacion.routes";
 // Servicios y controladores - SpeedCode
@@ -138,8 +138,8 @@ app.use(passport.session());
 
 // Configuración de servicios y controladores para notificaciones
 const sseService = SSEService.getInstance();
-const notificacionService = new NotificacionService();
-const notificacionController = new NotificacionController(notificacionService);
+/* const notificacionService = new NotificacionService(); */
+/* const notificacionController = new NotificacionController(notificacionService); */
 const sseController = new SSEController(sseService);
 
 // Configurar ping periódico para el SSE
