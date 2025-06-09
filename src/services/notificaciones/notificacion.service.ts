@@ -1,7 +1,7 @@
 //src/services/notificaciones/notificacion.service.ts
 import prisma from '../../config/database';
 import { NotificacionDTO, NotificacionFiltro } from '../../types/notificaciones/notificacion.types';
-import { PrioridadNotificacion, Notificacion } from '@prisma/client';
+import { PrioridadNotificacion } from '@prisma/client';
 import { SSEService } from './sse.service';
 
 // ============================================================================
@@ -315,7 +315,7 @@ export class NotificacionService {
           // 2) Por cada notificación, chequeamos entidadId + tipoEntidad
           //    y vamos a la tabla correspondiente para obtener imagenAuto
           const notificacionesConImagen = await Promise.all(
-            rawNotificaciones.map(async (n: Notificacion) => {
+            rawNotificaciones.map(async (n) => {
               let imagenAuto: string | null = null;
               const idEnt = n.idEntidad;
               const tipoEnt = n.tipoEntidad?.toLowerCase();
