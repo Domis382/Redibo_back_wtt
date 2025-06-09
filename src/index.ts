@@ -38,6 +38,8 @@ import { createNotificacionRoutes } from "./routes/notificaciones/notificacion.r
 //import mapaRoutes from "../src/routes/speedcode/filtroMapaPrecioRoutes";
 import mapaRoutes from "./routes/speedcode/filtroMapaPrecioRoutes";
 
+import { FRONTEND_URL } from "./config/constants";
+
 // Cargar variables de entorno
 dotenv.config();
 
@@ -73,7 +75,7 @@ async function ensureDefaultUbicacion() {
 
 // ✅ CORS robusto :l
 app.use((req: Request, res: Response, next: NextFunction): void => {
-  res.header("Access-Control-Allow-Origin", "http://localhost:3000");
+  res.header("Access-Control-Allow-Origin", `${FRONTEND_URL}`);
   res.header("Access-Control-Allow-Credentials", "true");
   res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
   res.header("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE, OPTIONS");
