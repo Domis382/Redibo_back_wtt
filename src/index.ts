@@ -88,7 +88,7 @@ app.use((req: Request, res: Response, next: NextFunction): void => {
   next();
 });
 
-// Middlewares básicos n
+// Middlewares básicos k
 app.use(helmet({ crossOriginResourcePolicy: false }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
