@@ -1,5 +1,5 @@
 import express, { Request, Response, NextFunction } from "express";
-import cors from "cors";
+/* import cors from "cors"; */
 import helmet from "helmet";
 import dotenv from "dotenv";
 dotenv.config();
@@ -20,7 +20,7 @@ import authRoutes from "./routes/auth/auth.routes";
 import authRegistroHostRoutes from "./routes/auth/registroHost.routes";
 import authRegistroDriverRoutes from "./routes/auth/registroDriver.routes";
 import usuarioRoutes from "./routes/auth/usuario.routes";
-import visualizarDriverRoutes from "./routes/auth/visualizarDriver.routes";
+//import visualizarDriverRoutes from "./routes/auth/visualizarDriver.routes";
 import listaDriversRoutes from "./routes/auth/listaDrivers.routes";
 import visualizarRentersRoutes from "./routes/auth/visualizarRenters.routes";
 
@@ -33,7 +33,15 @@ import { NotificacionService } from "./services/notificaciones/notificacion.serv
 import { NotificacionController } from "./controllers/notificaciones/notificacion.controller";
 import { SSEController } from "./controllers/notificaciones/sse.controller";
 import { createNotificacionRoutes } from "./routes/notificaciones/notificacion.routes";
-import { FRONTEND_URL } from "./config/constants";
+// Servicios y controladores - SpeedCode
+//import mapaRoutes from "../src/routes/speedcode/filtroMapaPrecioRoutes";
+import mapaRoutes from "./routes/speedcode/filtroMapaPrecioRoutes";
+
+//Servicios y controladores - QA-nTastic
+import autoRoutes from "./routes/qantastic/auto.routes"
+
+// Cargar variables de entorno
+dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -145,10 +153,17 @@ app.use("/api", passwordRoutes);
 app.use("/api", authRegistroHostRoutes);
 app.use("/api", authRegistroDriverRoutes);
 app.use("/api", usuarioRoutes);
-app.use("/api", visualizarDriverRoutes);
+//app.use("/api", visualizarDriverRoutes);
 app.use("/api", visualizarRentersRoutes);
 app.use("/api", listaDriversRoutes);
 app.use("/api", twofaRoutes);
+
+// Rutas de api - SpeedCode
+app.use('/api', mapaRoutes);
+
+//Rutas de api - QA-nTastic
+app.use('/api', autoRoutes);
+
 
 // Rutas de notificaciones
 app.use("/api/notificaciones", createNotificacionRoutes());
@@ -169,11 +184,49 @@ app.get("/health", (req, res) => {
 });
 
 app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
-  console.error("❌ Error no manejado:", err);
+  console.error("Error no manejado:", err);
   res.status(500).json({
     error: "Error interno del servidor",
     message: process.env.NODE_ENV === "development" ? err.message : "Algo salió mal"
   });
 });
+
+
+
+// Manejo de cierre del servidor
+process.on("SIGTERM", () => {
+  console.log("Cerrando servidor...");
+  sseService.cleanup();
+  prisma.$disconnect();
+  process.exit(0);
+});
+
+process.on("SIGINT", () => {
+  console.log("Cerrando servidor por SIGINT...");
+  sseService.cleanup();
+  prisma.$disconnect();
+  process.exit(0);
+});
+
+// Inicializar servidor
+async function startServer() {
+  try {
+    await ensureDefaultUbicacion();
+
+    app.listen(PORT, () => {
+      console.log(`🚀 Server running on port ${PORT}`);
+      console.log(`🌐 Environment: ${process.env.NODE_ENV || "development"}`);
+      console.log(`📡 Health check available at: http://localhost:${PORT}/health`);
+    });
+  } catch (error) {
+    console.error("❌ Error al iniciar el servidor:", error);
+    process.exit(1);
+  }
+}
+
+// Solo iniciar si este archivo es ejecutado directamente
+if (require.main === module) {
+  startServer();
+}
 
 export default app;
