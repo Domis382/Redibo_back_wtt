@@ -155,7 +155,7 @@ app.use("/api", passwordRoutes);
 app.use("/api", authRegistroHostRoutes);
 app.use("/api", authRegistroDriverRoutes);
 app.use("/api", usuarioRoutes);
-//app.use("/api", visualizarDriverRoutes);
+app.use("/api", visualizarDriverRoutes);
 app.use("/api", visualizarRentersRoutes);
 app.use("/api", listaDriversRoutes);
 app.use("/api", twofaRoutes);

@@ -1,4 +1,4 @@
-/*import { Response, NextFunction } from "express";
+import { Response, NextFunction } from "express";
 import { PrismaClient } from "@prisma/client";
 import { RequestHandler } from "express";
 // Ajusta la importación según el nombre correcto exportado desde authDriverMiddleware
@@ -31,4 +31,4 @@ export const getDriverProfile: RequestHandler = async (req, res, next) => {
     console.error("Error al obtener perfil del driver:", error);
     res.status(500).json({ message: "Error del servidor" });
   }
-};*/
+};
