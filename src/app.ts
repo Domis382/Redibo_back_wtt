@@ -40,6 +40,8 @@ import mapaRoutes from "./routes/speedcode/filtroMapaPrecioRoutes";
 //Servicios y controladores - QA-nTastic
 import autoRoutes from "./routes/qantastic/auto.routes"
 
+import { FRONTEND_URL } from "./config/constants"; // Asegúrate de tener esto arriba
+
 // Cargar variables de entorno
 dotenv.config();
 
@@ -75,7 +77,7 @@ async function ensureDefaultUbicacion() {
 
 // ✅ CORS robusto
 app.use((req: Request, res: Response, next: NextFunction): void => {
-  res.header("Access-Control-Allow-Origin", "${FRONTEND_URL}");
+  res.header("Access-Control-Allow-Origin", `${FRONTEND_URL}`);
   res.header("Access-Control-Allow-Credentials", "true");
   res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
   res.header("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE, OPTIONS");
