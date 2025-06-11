@@ -93,7 +93,7 @@ app.use(helmet({ crossOriginResourcePolicy: false }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Middleware para keep-alive (para notificaciones SSE)
+// Middleware para keep-alive (para _notificaciones SSE)
 app.use((req, res, next) => {
   req.socket.setKeepAlive(true);
   req.socket.setTimeout(0);
