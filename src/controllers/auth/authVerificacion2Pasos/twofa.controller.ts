@@ -45,11 +45,11 @@ export const verificarCodigo2FA = async (idUsuario: number, codigo: string) => {
   }
 
   if (user.codigo2FA !== codigo) {
-    throw new Error('Código incorrecto');
+    throw new Error('El código ingresado es incorrecto. Intenta nuevamente.');
   }
 
   if (new Date() > user.codigo2FAExpira) {
-    throw new Error('Código expirado');
+    throw new Error('El código ha expirado. Solicita uno nuevo.');
   }
 
   await prisma.usuario.update({
@@ -86,11 +86,11 @@ export const verifyLoginCode = async (idUsuario: number, codigo: string) => {
   }
 
   if (user.codigo2FA !== codigo) {
-    throw new Error('Código incorrecto');
+    throw new Error('El código ingresado es incorrecto. Intenta nuevamente.');
   }
 
   if (new Date() > user.codigo2FAExpira) {
-    throw new Error('Código expirado');
+    throw new Error('El código ha expirado. Solicita uno nuevo.');
   }
 
   // Limpiar el código

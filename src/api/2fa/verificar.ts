@@ -31,7 +31,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     if (new Date() > user.codigo2FAExpira) {
-      return res.status(400).json({ message: 'Código expirado' });
+      return res.status(400).json({ message: 'Código expirado ' });
     }
 
     // ✅ Éxito: opcionalmente, puedes limpiar el código

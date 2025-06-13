@@ -1,5 +1,4 @@
-
-//src/middlewares/auth/authDriverMiddleware.ts
+// src/middlewares/auth/authDriverMiddleware.ts
 import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
 

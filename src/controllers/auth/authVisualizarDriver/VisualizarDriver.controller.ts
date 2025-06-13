@@ -1,14 +1,13 @@
-import { Response, NextFunction } from "express";
-import { PrismaClient } from "@prisma/client";
+// src/controllers/auth/authVisualizarDriver/visualizarDriver.controller.ts
 import { RequestHandler } from "express";
-// Ajusta la importación según el nombre correcto exportado desde authDriverMiddleware
-import type { Request } from "express";
-type AuthenticatedRequest = Request & { user?: { idUsuario: number } };
+import { PrismaClient } from "@prisma/client";
+import { AuthenticatedRequest } from "../../../middlewares/auth/authDriverMiddleware";
 
 const prisma = new PrismaClient();
 
 export const getDriverProfile: RequestHandler = async (req, res, next) => {
-  const user = (req as any).user; // 👈 si necesitas el tipo exacto, puedes usar un cast
+  const authReq = req as AuthenticatedRequest;
+  const idUsuario = authReq.user?.idUsuario;
 
   if (!user?.idUsuario) {
     res.status(401).json({ message: "No autorizado: token inválido" });
@@ -32,3 +31,4 @@ export const getDriverProfile: RequestHandler = async (req, res, next) => {
     res.status(500).json({ message: "Error del servidor" });
   }
 };
+//cambios
