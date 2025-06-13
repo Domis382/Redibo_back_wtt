@@ -1,6 +1,6 @@
 //src/routes/auth/visualizarDriver.routes.ts
 import { Router } from "express";
-import { getDriverProfile } from "../../controllers/auth/authVisualizarDriver/VisualizarDriver.controller";
+import { getDriverProfile } from "../../controllers/auth/authVisualizarDriver/visualizarDriver.controller";
 import { authDriverMiddleware } from "../../middlewares/auth/authDriverMiddleware";
 
 const router = Router();
