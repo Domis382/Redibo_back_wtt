@@ -24,6 +24,7 @@ import visualizarDriverRoutes from "./routes/auth/visualizarDriver.routes";
 import listaDriversRoutes from "./routes/auth/listaDrivers.routes";
 import visualizarRentersRoutes from "./routes/auth/visualizarRenters.routes";
 import editarDriverRoutes from "./routes/auth/editarDriver.routes";
+import routesCodeLovers from "./routes/codelovers/routesCodelovers";
 // Verificación en 2 pasos
 import twofaRoutes from "./routes/auth/twofa.routes";
 
@@ -161,6 +162,8 @@ app.use("/api", listaDriversRoutes);
 app.use("/api", twofaRoutes);
 app.use("/api", editarDriverRoutes);
 
+
+app.use('/api', routesCodeLovers);
 // Rutas de api - SpeedCode
 app.use('/api', mapaRoutes);
 
