@@ -5,7 +5,7 @@ import { authDriverMiddleware } from "../../middlewares/auth/authDriverMiddlewar
 
 const router = Router();
 
-//Ruta segura: obtiene el perfil desde el token
+//Ruta segura: obtiene el perfil desde el token_
 router.get("/profile", authDriverMiddleware, getDriverProfile);
 
 export default router;
