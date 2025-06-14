@@ -1,4 +1,4 @@
-// src/controllers/auth/authVisualizarDriver/visualizarDriver.controller.ts
+// src/controllers/auth/authVisualizarDriver/VisualizarDriver.controller.ts
 import { RequestHandler } from "express";
 import { PrismaClient } from "@prisma/client";
 import { AuthenticatedRequest } from "../../../middlewares/auth/authDriverMiddleware";
