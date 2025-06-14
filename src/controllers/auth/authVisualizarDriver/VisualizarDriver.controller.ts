@@ -9,14 +9,14 @@ export const getDriverProfile: RequestHandler = async (req, res, next) => {
   const authReq = req as AuthenticatedRequest;
   const idUsuario = authReq.user?.idUsuario;
 
-  if (!user?.idUsuario) {
+  if (!idUsuario) {
     res.status(401).json({ message: "No autorizado: token inválido" });
     return;
   }
 
   try {
     const driver = await prisma.driver.findUnique({
-      where: { idUsuario: user.idUsuario },
+      where: { idUsuario: idUsuario },
       include: { usuario: true },
     });
 
